@@ -3,27 +3,27 @@
 
 import { Button } from "@heroui/button";
 
-export const InteractiveCard = ({
+export const Card = ({
   title,
   details,
   onClick,
 }: {
   title: string;
   details: string;
-  onClick: () => void;
+  onClick?: () => void;
 }) => {
   return (
     <Button
       fullWidth
-      variant="bordered"
-      className="hover:bg-purple-50 justify-between"
+      color="secondary"
+      variant="flat"
+      className="justify-start items-start h-auto"
       onClick={onClick}
     >
-      <div className="text-left">
+      <div className="text-left my-1">
         <p className="font-medium">{title}</p>
-        <p className="text-sm text-gray-500">{details}</p>
+        <p className="text-sm">{details}</p>
       </div>
-      <span className="text-purple-600 text-sm">▶</span>
     </Button>
   );
 };
