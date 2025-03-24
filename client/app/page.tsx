@@ -56,7 +56,7 @@ export default function Home() {
         <div className="flex-1 bg-gray-100 p-4 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Recent Games</h2>
           <div className="space-y-3">
-            <Card title="Math Basics" details="50 cards" />
+            {/*<Card title="Math Basics" details="50 cards" />*/}
           </div>
         </div>
 
@@ -64,8 +64,6 @@ export default function Home() {
         <div className="flex-1 bg-gray-100 p-4 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Community Decks</h2>
           <div className="space-y-3">
-            <Card title="Another deck" details="70 cards" />
-            <Card title="Another deck" details="70 cards" />
           </div>
         </div>
 
@@ -78,8 +76,6 @@ export default function Home() {
           <div className="grow bg-gray-100 p-4 mt-4 rounded-lg">
             <h2 className="text-xl font-bold mb-4">Your Decks</h2>
             <div className="space-y-3">
-              <Card title="Another deck" details="70 cards" />
-              <Card title="Another deck" details="70 cards" />
             </div>
           </div>
         </div>
