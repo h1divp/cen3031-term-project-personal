@@ -5,28 +5,27 @@ import { Image } from "@heroui/image";
 import { Link } from "@heroui/link";
 import { Card } from "../components/Card";
 import { AccountSection } from "../components/Account";
-import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation';
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// const supabase = createClient(
+//   process.env.NEXT_PUBLIC_SUPABASE_URL!,
+//   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+// );
 
 export default function Home() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/login');
-      } else {
-        setLoading(false);
-      }
-    };
-    checkAuth();
-  }, [router]);
+  // useEffect(() => {
+  //   const checkAuth = async () => {
+  //     const { data: { user } } = await supabase.auth.getUser();
+  //     if (!user) {
+  //       router.push('/login');
+  //     } else {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   checkAuth();
+  // }, [router]);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -58,7 +57,6 @@ export default function Home() {
           <h2 className="text-xl font-bold mb-4">Recent Games</h2>
           <div className="space-y-3">
             <Card title="Math Basics" details="50 cards" />
-            <Card title="Sorting Algorithms" details="100 cards" />
           </div>
         </div>
 
