@@ -40,7 +40,7 @@ export default function LoginPage() {
       setError(authError.message)
       setLoading(false)
     } else {
-      router.push('/dashboard')
+      router.push('../')
     }
   }
 
@@ -57,7 +57,7 @@ export default function LoginPage() {
       <div className="flex-1 bg-gray-50 flex items-center justify-center p-4">
         <div className="w-full max-w-md transform transition-all">
           <Form onSubmit={handleLogin} className="w-full space-y-6 p-8 bg-white rounded-lg shadow-lg">
-            <div className="space-y-4">
+            <div className="w-full space-y-4">
               <h1 className="text-2xl font-bold text-center text-purple-500 mb-8">
                 Login to Your Account
               </h1>
