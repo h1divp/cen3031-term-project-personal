@@ -13,27 +13,47 @@ const supabase = createClient(
 
 export default function SignupPage() {
   const router = useRouter()
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
+  const [emailConfirm, setEmailConfirm] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (user) router.push('/dashboard')
+      if (user) router.push('../')
     }
     checkAuth()
   }, [router])
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError(null)
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+    if (email !== emailConfirm) {
+      setError('Emails must be the same');
+      return;    
+    }
+    if (password !== passwordConfirm) {
+      setError('Passwords must be the same');
+      return;
+    }
+    
+    setLoading(true)
 
     const { data, error: authError } = await supabase.auth.signUp({
       email,
-      password
+      password,
+      options: {
+        data: {display_name: `${username}`}
+      }
     })
 
     if (authError) {
@@ -60,7 +80,7 @@ export default function SignupPage() {
       <div className="flex-1 bg-gray-50 flex items-center justify-center p-4">
         <div className="w-full max-w-md transform transition-all">
           <Form onSubmit={handleSignup} className="w-full space-y-6 p-8 bg-white rounded-lg shadow-lg">
-            <div className="space-y-4">
+            <div className="w-full space-y-4">
               <h1 className="text-2xl font-bold text-center text-purple-500 mb-8">
                 Create New Account
               </h1>
@@ -72,12 +92,32 @@ export default function SignupPage() {
               )}
 
               <Input
+                label="Username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                placeholder="Enter your username"
+                className="focus:ring-purple-500 focus:border-purple-500"
+              />
+
+              <Input
                 label="Email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="Enter your email"
+                className="focus:ring-purple-500 focus:border-purple-500"
+              />
+                
+              <Input
+                label="Confirm email"
+                type="email"
+                value={emailConfirm}
+                onChange={(e) => setEmailConfirm(e.target.value)}
+                required
+                placeholder="Confirm your email"
                 className="focus:ring-purple-500 focus:border-purple-500"
               />
 
@@ -88,6 +128,16 @@ export default function SignupPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="Create a password"
+                className="focus:ring-purple-500 focus:border-purple-500"
+              />
+
+              <Input
+                label="Confirm password"
+                type="password"
+                value={passwordConfirm}
+                onChange={(e) => setPasswordConfirm(e.target.value)}
+                required
+                placeholder="Confirm your password"
                 className="focus:ring-purple-500 focus:border-purple-500"
               />
 
@@ -103,7 +153,7 @@ export default function SignupPage() {
                 Already have an account?{' '}
                 <Button
                   variant="bordered"
-                  onClick={() => router.push('/login')}
+                  onPress={() => router.push('/login')}
                   className="text-purple-600 hover:text-purple-800 font-medium px-1.5"
                 >
                   Log in

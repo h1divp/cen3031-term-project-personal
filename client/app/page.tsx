@@ -39,8 +39,14 @@ export default function Home() {
         <div className="container mx-auto flex justify-between items-center">
           <div className="text-xl font-bold">GitGud At Studying</div>
           <ButtonGroup>
-            <Button variant="ghost">Login</Button>
-            <Button variant="ghost">Sign Up</Button>
+            <Button 
+            variant="ghost"
+            onClick={() => router.push('/login')}            
+            >Log In</Button>
+            <Button 
+            variant="ghost"
+            onClick={() => router.push('/signup')}            
+            >Sign Up</Button>
           </ButtonGroup>
         </div>
       </nav>
