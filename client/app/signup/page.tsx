@@ -13,6 +13,7 @@ const supabase = createClient(
 
 export default function SignupPage() {
   const router = useRouter()
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -21,7 +22,7 @@ export default function SignupPage() {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (user) router.push('/dashboard')
+      if (user) router.push('../')
     }
     checkAuth()
   }, [router])
@@ -33,7 +34,10 @@ export default function SignupPage() {
 
     const { data, error: authError } = await supabase.auth.signUp({
       email,
-      password
+      password,
+      options: {
+        data: {display_name: `${username}`}
+      }
     })
 
     if (authError) {
@@ -70,6 +74,16 @@ export default function SignupPage() {
                   {error}
                 </div>
               )}
+
+              <Input
+                label="Username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                placeholder="Enter your username"
+                className="focus:ring-purple-500 focus:border-purple-500"
+              />
 
               <Input
                 label="Email"
