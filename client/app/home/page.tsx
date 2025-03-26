@@ -4,14 +4,18 @@ import { Image } from "@heroui/image";
 import { Link } from "@heroui/link";
 import { Card } from "../../components/Card";
 import { AccountSection } from "../../components/Account";
+import AuthButton from "@/components/AuthButton";
 
+// TODO: umount components until login
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Top Navigation Bar */}
-      <nav className="bg-white p-4 text-purple-500">
+      <nav className="bg-white p-4 ">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="text-xl font-bold">GitGud At Studying</div>
+          <div className="text-xl font-bold text-purple-500">GitGud At Studying</div>
+          <div className="text-xl font-bold">Not authenticated</div>
+          <AuthButton />
         </div>
       </nav>
 

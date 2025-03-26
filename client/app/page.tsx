@@ -1,35 +1,13 @@
-"use client";
-import { useEffect, useState } from 'react';
-import { Button, ButtonGroup } from "@heroui/button";
-import { Image } from "@heroui/image";
-import { Link } from "@heroui/link";
-import { Card } from "../components/Card";
-import { AccountSection } from "../components/Account";
-import { useRouter } from 'next/navigation';
-// const supabase = createClient(
-//   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-//   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-// );
+import { createClient } from "@/utils/supabase/server"
+import { ButtonGroup, Button } from "@heroui/button"
+import 
 
-export default function Home() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
+export default async function Home() {
+  const supabase = await createClient()
 
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     const { data: { user } } = await supabase.auth.getUser();
-  //     if (!user) {
-  //       router.push('/login');
-  //     } else {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   checkAuth();
-  // }, [router]);
+  const session = await supabase.auth.getUser()
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
+  console.log(session)
 
   return (
     <div className="min-h-screen flex flex-col">
