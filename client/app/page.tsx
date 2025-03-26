@@ -1,13 +1,15 @@
-import { createClient } from "@/utils/supabase/server"
 import { ButtonGroup, Button } from "@heroui/button"
-import 
+import { createClient } from "../utils/supabase/server";
+// In utils/supabase: there are two files which each have a createClient function. One is used for pages rendered by the server (determined via "use server" by Next.js) and for pages rendered by the client ("use client"). Please be sure to import the correct one. See Supabase Auth docs if confused.
+
+import { useRouter } from "next/router";
+import { AccountSection } from "@/components/Account";
 
 export default async function Home() {
-  const supabase = await createClient()
 
-  const session = await supabase.auth.getUser()
-
-  console.log(session)
+  const supabase = await createClient();
+  const router = useRouter();
+  console.log(supabase.auth.getUser());
 
   return (
     <div className="min-h-screen flex flex-col">
