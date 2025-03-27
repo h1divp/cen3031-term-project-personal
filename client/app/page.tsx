@@ -1,13 +1,12 @@
+"use client"
 import { ButtonGroup, Button } from "@heroui/button"
-import { createClient } from "../utils/supabase/server";
-// In utils/supabase: there are two files which each have a createClient function. One is used for pages rendered by the server (determined via "use server" by Next.js) and for pages rendered by the client ("use client"). Please be sure to import the correct one. See Supabase Auth docs if confused.
-
-import { useRouter } from "next/router";
+import { createClient } from "../utils/supabase/client";
+import { useRouter } from "next/navigation";
 import { AccountSection } from "@/components/Account";
+import SignInWithGoogle from "@/components/SignInWithGoogle";
 
-export default async function Home() {
-
-  const supabase = await createClient();
+export default function Home() {
+  const supabase = createClient();
   const router = useRouter();
   console.log(supabase.auth.getUser());
 
@@ -18,14 +17,15 @@ export default async function Home() {
         <div className="container mx-auto flex justify-between items-center">
           <div className="text-xl font-bold">GitGud At Studying</div>
           <ButtonGroup>
-            <Button 
-            variant="ghost"
-            onClick={() => router.push('/login')}            
+            <Button
+              variant="ghost"
+              onClick={() => router.push('/login')}
             >Log In</Button>
-            <Button 
-            variant="ghost"
-            onClick={() => router.push('/signup')}            
+            <Button
+              variant="ghost"
+              onClick={() => router.push('/signup')}
             >Sign Up</Button>
+            {/*<SignInWithGoogle />*/}
           </ButtonGroup>
         </div>
       </nav>

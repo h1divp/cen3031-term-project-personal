@@ -1,15 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/utils/supabase/client'
 import { Input } from "@heroui/input"
 import { Button, ButtonGroup } from "@heroui/button"
-import { Form } from "@heroui/form"
+import { Form } from "@heroui/form";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+const supabase = createClient();
 
 export default function LoginPage() {
   const router = useRouter()
