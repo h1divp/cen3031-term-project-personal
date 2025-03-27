@@ -2,13 +2,20 @@
 import { Avatar } from "@heroui/avatar";
 
 // TODO: Pass in User object as state, so that stats, username, avatar, etc can be pulled from it.
+// const Home: NextPage<{ events: Event[] }> = ({ events }) => {
 export const AccountSection = () => {
   return (
     <div className="flex flex-col">
       <div className="flex flex-row">
         <Avatar className="w-20 h-20" />
-        <p className="my-auto ml-2 text-left text-xl font-black">Logged out</p>
-      </div>
+        {/*        {id ? (
+          <p className="my-auto ml-2 text-left text-xl font-black">
+            {id}</p>
+        ) : (
+          <p className="my-auto ml-2 text-left text-xl font-black">
+            Logged out</p>
+        )}
+*/}      </div>
       <div className="flex flex-col mt-1 text-lg text-left">
         <div className="flex flex-row place-content-around">
           <span>Games won: </span>

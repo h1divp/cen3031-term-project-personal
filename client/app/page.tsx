@@ -15,12 +15,20 @@ export default function Home() {
   useEffect(() => {
     const getSessionData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) setUser(user)
+      if (user) {
+        setUser(user)
+      }
       console.log("user id", user?.id);
     }
 
-    getSessionData()
+    getSessionData();
   }, []);
+
+  const signOut = () => {
+    supabase.auth.signOut()
+    setUser(undefined);
+  }
+
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -28,7 +36,12 @@ export default function Home() {
       <nav className="bg-white p-4 text-purple-500">
         <div className="container mx-auto flex justify-between items-center">
           <div className="text-xl font-bold">GitGud At Studying</div>
-          {!user && (
+          {user ? (
+            <div>
+              <p>Logged in as {(user?.id).slice(0, 10)}...</p>
+              <Button variant="ghost" onClick={signOut}>Sign out</Button>
+            </div>
+          ) : (
             <ButtonGroup>
               <Button
                 variant="ghost"
