@@ -18,6 +18,7 @@ export default function LoginPage() {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser()
+      console.log(user)
       if (user) router.push('../')
     }
     checkAuth()
@@ -58,7 +59,7 @@ export default function LoginPage() {
               <h1 className="text-2xl font-bold text-center text-purple-500 mb-8">
                 Login to Your Account
               </h1>
-              
+
               {error && (
                 <div className="text-red-500 text-sm text-center p-3 bg-red-50 rounded-md">
                   {error}
