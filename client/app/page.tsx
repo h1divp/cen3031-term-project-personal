@@ -1,36 +1,34 @@
-"use client";
-import { useEffect, useState } from 'react';
-import { Button, ButtonGroup } from "@heroui/button";
-import { Image } from "@heroui/image";
-import { Link } from "@heroui/link";
-import { Card } from "../components/Card";
-import { AccountSection } from "../components/Account";
-import { createClient } from '@supabase/supabase-js'
-import { useRouter } from 'next/navigation';
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+"use client"
+import { ButtonGroup, Button } from "@heroui/button"
+import { createClient } from "../utils/supabase/client";
+import { useRouter } from "next/navigation";
+import { AccountSection } from "@/components/Account";
+import SignInWithGoogle from "@/components/SignInWithGoogle";
+import { useEffect, useState } from "react";
+import { User, UserResponse } from "@supabase/supabase-js";
 
 export default function Home() {
+  const supabase = createClient();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User>();
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const getSessionData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/login');
-      } else {
-        setLoading(false);
+      if (user) {
+        setUser(user)
       }
-    };
-    checkAuth();
-  }, [router]);
+      console.log("user id", user?.id);
+    }
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    getSessionData();
+  }, []);
+
+  const signOut = () => {
+    supabase.auth.signOut()
+    setUser(undefined);
   }
+
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -38,10 +36,24 @@ export default function Home() {
       <nav className="bg-white p-4 text-purple-500">
         <div className="container mx-auto flex justify-between items-center">
           <div className="text-xl font-bold">GitGud At Studying</div>
-          <ButtonGroup>
-            <Button variant="ghost">Login</Button>
-            <Button variant="ghost">Sign Up</Button>
-          </ButtonGroup>
+          {user ? (
+            <div>
+              <p>Logged in as {(user?.id).slice(0, 10)}...</p>
+              <Button variant="ghost" onClick={signOut}>Sign out</Button>
+            </div>
+          ) : (
+            <ButtonGroup>
+              <Button
+                variant="ghost"
+                onClick={() => router.push('/login')}
+              >Log In</Button>
+              <Button
+                variant="ghost"
+                onClick={() => router.push('/signup')}
+              >Sign Up</Button>
+              {/*<SignInWithGoogle />*/}
+            </ButtonGroup>
+          )}
         </div>
       </nav>
 
@@ -51,8 +63,7 @@ export default function Home() {
         <div className="flex-1 bg-gray-100 p-4 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Recent Games</h2>
           <div className="space-y-3">
-            <Card title="Math Basics" details="50 cards" />
-            <Card title="Sorting Algorithms" details="100 cards" />
+            {/*<Card title="Math Basics" details="50 cards" />*/}
           </div>
         </div>
 
@@ -60,8 +71,6 @@ export default function Home() {
         <div className="flex-1 bg-gray-100 p-4 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Community Decks</h2>
           <div className="space-y-3">
-            <Card title="Another deck" details="70 cards" />
-            <Card title="Another deck" details="70 cards" />
           </div>
         </div>
 
@@ -73,10 +82,8 @@ export default function Home() {
           </div>
           <div className="grow bg-gray-100 p-4 mt-4 rounded-lg">
             <h2 className="text-xl font-bold mb-4">Your Decks</h2>
-            <div className="space-y-3">
-              <Card title="Another deck" details="70 cards" />
-              <Card title="Another deck" details="70 cards" />
-            </div>
+            {/*<div className="space-y-3">
+            </div>*/}
           </div>
         </div>
       </div>
