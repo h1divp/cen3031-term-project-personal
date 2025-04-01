@@ -1,45 +1,31 @@
 "use client"
 import { ButtonGroup, Button } from "@heroui/button"
-import { createClient } from "../utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { AccountSection } from "@/components/Account";
-import SignInWithGoogle from "@/components/SignInWithGoogle";
-import { useEffect, useState } from "react";
-import { User, UserResponse } from "@supabase/supabase-js";
+import { NavigationBar } from "@/components/Navbar";
+import { useUserContext } from "@/contexts/UserContext";
+import { useEffect } from "react";
 
 export default function Home() {
-  const supabase = createClient();
   const router = useRouter();
-  const [user, setUser] = useState<User>();
+  const session = useUserContext();
 
+  // Get user session data every page load by leaving the useEffect dependancies empty.
   useEffect(() => {
-    const getSessionData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUser(user)
-      }
-      console.log("user id", user?.id);
-    }
-
-    getSessionData();
-  }, []);
-
-  const signOut = () => {
-    supabase.auth.signOut()
-    setUser(undefined);
-  }
-
+    session?.getSessionData();
+  }, [])
 
   return (
     <div className="min-h-screen flex flex-col">
       {/* Top Navigation Bar */}
+      {/*<NavigationBar user={user} />*/}
       <nav className="bg-white p-4 text-purple-500">
         <div className="container mx-auto flex justify-between items-center">
           <div className="text-xl font-bold">GitGud At Studying</div>
-          {user ? (
+          {session?.user ? (
             <div>
-              <p>Logged in as {(user?.id).slice(0, 10)}...</p>
-              <Button variant="ghost" onClick={signOut}>Sign out</Button>
+              <p>Logged in as {(session?.user?.id).slice(0, 10)}...</p>
+              <Button variant="ghost" onClick={session?.signOut}>Sign out</Button>
             </div>
           ) : (
             <ButtonGroup>
@@ -51,7 +37,6 @@ export default function Home() {
                 variant="ghost"
                 onClick={() => router.push('/signup')}
               >Sign Up</Button>
-              {/*<SignInWithGoogle />*/}
             </ButtonGroup>
           )}
         </div>
