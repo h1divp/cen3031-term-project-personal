@@ -1,46 +1,13 @@
 "use client"
 import { ButtonGroup, Button } from "@heroui/button"
-import { useRouter } from "next/navigation";
 import { AccountSection } from "@/components/Account";
 import { NavigationBar } from "@/components/Navbar";
-import { useUserContext } from "@/contexts/UserContext";
-import { useEffect } from "react";
 
 export default function Home() {
-  const router = useRouter();
-  const session = useUserContext();
-
-  // Get user session data every page load by leaving the useEffect dependancies empty.
-  useEffect(() => {
-    session?.getSessionData();
-  }, [])
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Top Navigation Bar */}
-      {/*<NavigationBar user={user} />*/}
-      <nav className="bg-white p-4 text-purple-500">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="text-xl font-bold">GitGud At Studying</div>
-          {session?.user ? (
-            <div>
-              <p>Logged in as {(session?.user?.id).slice(0, 10)}...</p>
-              <Button variant="ghost" onClick={session?.signOut}>Sign out</Button>
-            </div>
-          ) : (
-            <ButtonGroup>
-              <Button
-                variant="ghost"
-                onClick={() => router.push('/login')}
-              >Log In</Button>
-              <Button
-                variant="ghost"
-                onClick={() => router.push('/signup')}
-              >Sign Up</Button>
-            </ButtonGroup>
-          )}
-        </div>
-      </nav>
+      <NavigationBar />
 
       {/* Main Content - Three Columns */}
       <div className="flex-1 container mx-auto p-4 flex gap-4">

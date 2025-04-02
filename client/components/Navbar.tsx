@@ -1,5 +1,6 @@
-"use client"
-import { useUserContext } from "@/contexts/UserContext"
+"use client";
+
+import { useUserContext } from "@/contexts/UserProvider"
 import { Button, ButtonGroup } from "@heroui/button"
 import { Navbar, NavbarBrand, NavbarContent } from "@heroui/navbar"
 import { User } from "@supabase/supabase-js"
