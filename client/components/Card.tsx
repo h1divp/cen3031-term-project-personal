@@ -1,4 +1,3 @@
-// components/InteractiveCard.tsx
 "use client";
 
 import { Button } from "@heroui/button";

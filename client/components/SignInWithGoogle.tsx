@@ -1,4 +1,5 @@
-"use client"
+"use client";
+
 import { signInWithGoogle } from "@/utils/supabase/actions"
 import { Button } from "@heroui/button"
 import React from "react"
