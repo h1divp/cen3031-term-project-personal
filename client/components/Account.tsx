@@ -19,33 +19,27 @@ export const AccountSection = () => {
   }, [session])
 
   return (
-    <div className="flex flex-col">
-      <div className="flex flex-row">
-        <Avatar className="w-20 h-20" />
-        <p className="my-auto ml-2 text-left text-xl font-black"> Username
-        </p>
-      </div>
-      <div className="flex flex-col mt-1 text-lg text-left">
-        {query?.userStorageRow ? (
-          <div className="flex flex-col place-content-around">
-            <span>Games won: {query.userStorageRow.games_won}</span>
-            <span>Decks created: {query.userStorageRow.decks ? query.userStorageRow.decks.length : 0}</span>
-            <span>Most points: {query.userStorageRow.points_total}</span>
-            <span>Account created: {session?.user?.created_at}</span>
+    <>
+      {session?.user && query?.userStorageRow ? (
+        <div className="flex flex-col">
+          <div className="flex flex-row">
+            <Avatar className="w-20 h-20" />
+            <p className="my-auto ml-2 text-left text-xl font-black">
+              {(session?.user?.id).slice(0, 10)}...
+            </p>
           </div>
-        ) : (
-          <div>
-            <div className="flex flex-row place-content-around">
-              <span>Games won: </span>
-              <span>Decks created: </span>
-            </div>
-            <div className="flex flex-row place-content-around">
-              <span>Most points: </span>
-              <span>Account created: </span>
+          <div className="flex flex-col mt-1 text-lg text-left">
+            <div className="flex flex-col place-content-around">
+              <span>Games won: {query.userStorageRow.games_won}</span>
+              <span>Decks created: {query.userStorageRow.decks ? query.userStorageRow.decks.length : 0}</span>
+              <span>Most points: {query.userStorageRow.points_total}</span>
+              <span>Account created: {session?.user?.created_at}</span>
             </div>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      ) : (
+        <div></div>
+      )}
+    </>
   );
 };

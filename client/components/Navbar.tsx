@@ -13,13 +13,18 @@ export const NavigationBar = () => {
   const session = useUserContext();
   const router = useRouter();
 
+  const signOutOnClick = () => {
+    session?.signOut();
+    router.refresh();
+  }
+
   // Get user session data every page load by leaving the useEffect dependancies empty.
   useEffect(() => {
     session?.getSessionData();
   }, [])
 
   return (
-    <Navbar>
+    <Navbar maxWidth="full">
       <NavbarBrand className="text-purple-700">
         {/*self made icon from figma*/}
         <svg width="111" height="100" viewBox="0 0 111 100" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" className="size-9 mr-1 pb-1">
@@ -30,9 +35,9 @@ export const NavigationBar = () => {
       </NavbarBrand>
       <NavbarContent justify="end">
         {session?.user ? (
-          <div>
-            <p>Logged in as {(session?.user?.id).slice(0, 10)}...</p>
-            <Button variant="ghost" onClick={session?.signOut}>Sign out</Button>
+          <div className="flex flex-row items-center">
+            <p className="mr-1">Logged in as {(session?.user?.id).slice(0, 10)}...</p>
+            <Button variant="ghost" onClick={signOutOnClick}>Sign out</Button>
           </div>
         ) : (
           <ButtonGroup>
