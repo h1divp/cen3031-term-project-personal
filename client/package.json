@@ -27,7 +27,6 @@
     "@supabase-cache-helpers/postgrest-react-query": "^1.12.1",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.4",
-    "@tanstack/react-query": "^5.71.1",
     "clsx": "2.1.1",
     "framer-motion": "11.13.1",
     "intl-messageformat": "^10.5.0",

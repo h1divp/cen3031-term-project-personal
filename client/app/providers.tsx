@@ -7,7 +7,7 @@ import { HeroUIProvider } from "@heroui/system";
 import { useRouter } from "next/navigation";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { UserProvider } from "@/contexts/UserProvider";
-import { ReactQueryClientProvider } from "@/contexts/ReactQueryClientProvider";
+import { QueryProvider } from "@/contexts/QueryProvider";
 
 export interface ProvidersProps {
   children: React.ReactNode;
@@ -29,9 +29,9 @@ export function Providers({ children, themeProps }: ProvidersProps) {
     <HeroUIProvider navigate={router.push}>
       <NextThemesProvider {...themeProps}>
         <UserProvider>
-          <ReactQueryClientProvider>
+          <QueryProvider>
             {children}
-          </ReactQueryClientProvider>
+          </QueryProvider>
         </UserProvider>
       </NextThemesProvider>
     </HeroUIProvider>
