@@ -18,7 +18,7 @@ export const AccountSection = () => {
 
   const [createdDate, setCreatedDate] = useState<Date | undefined>(undefined);
   const [displayName, setDisplayName] = useState<string>("no name");
-  const [profileColor, setProfileColor] = useState<profileColorType>({ color: "#ff0000" });
+  const [profileColor, setProfileColor] = useState<profileColorType>({ color: "#555555" });
 
   // Runs after session changes
   useEffect(() => {

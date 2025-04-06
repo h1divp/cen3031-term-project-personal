@@ -3,7 +3,7 @@ import { createClient } from "@/utils/supabase/client";
 import { createContext, useContext, useEffect, useState } from "react"
 
 type QueryContextType = {
-  userStorageRow: Database["public"]["Tables"]["user_storage"]["Row"] | undefined;
+  userData: Database["public"]["Tables"]["user_storage"]["Row"] | undefined;
   getUserStorageRowFromId: (id: Database["public"]["Tables"]["user_storage"]["Row"]["id"]) => void;
 }
 
@@ -23,17 +23,16 @@ export const QueryProvider = ({ children }: { children: React.ReactNode }) => {
 
   const supabase = createClient();
 
-  const [userStorageRow, setUserStorageRow] = useState<Database["public"]["Tables"]["user_storage"]["Row"] | undefined>(undefined);
+  const [userData, setUserData] = useState<Database["public"]["Tables"]["user_storage"]["Row"] | undefined>(undefined);
 
   const getUserStorageRowFromId = async (id: Database["public"]["Tables"]["user_storage"]["Row"]["id"]) => {
     const { data, error } = await supabase.from("user_storage").select().eq("id", id);
-    console.log("not it", data);
-    if (data) setUserStorageRow(data[0]);
+    if (data) setUserData(data[0]);
     if (error) console.log(error);
   }
 
   return (
-    <QueryContext.Provider value={{ userStorageRow, getUserStorageRowFromId }} >
+    <QueryContext.Provider value={{ userData, getUserStorageRowFromId }} >
       {children}
     </QueryContext.Provider>
   )
