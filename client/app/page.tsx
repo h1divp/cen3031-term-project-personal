@@ -2,8 +2,12 @@
 import { ButtonGroup, Button } from "@heroui/button"
 import { AccountSection } from "@/components/Account";
 import { NavigationBar } from "@/components/Navbar";
+import { Card } from "@/components/Card";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+
+  const router = useRouter();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -34,8 +38,7 @@ export default function Home() {
           </div>
           <div className="grow bg-gray-100 p-4 mt-4 rounded-lg">
             <h2 className="text-xl font-bold mb-4">Your Decks</h2>
-            {/*<div className="space-y-3">
-            </div>*/}
+            <Card title="Create deck" details="" onClick={() => { router.push("/editor") }} isMenuOpt />
           </div>
         </div>
       </div>
