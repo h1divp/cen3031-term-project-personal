@@ -1,26 +1,12 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { Button } from "@heroui/button";
 import { NavigationBar } from '@/components/Navbar';
+import { Textarea } from '@heroui/input';
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-// Interface for the deck structure
-interface Deck {
-  id?: number;
-  ownerID: number;
-  user_saved: number[];
-  Front: string[];
-  Back: string[];
-}
-
-const StudyCardDeckCreator: React.FC = () => {
+const Editor: React.FC = () => {
   const router = useRouter();
 
   // State for managing deck creation
@@ -32,126 +18,133 @@ const StudyCardDeckCreator: React.FC = () => {
   const [frontTexts, setFrontTexts] = useState<string[]>([]);
   const [backTexts, setBackTexts] = useState<string[]>([]);
 
-  // State for user authentication (placeholder - replace with actual auth)
-  const [currentUserID, setCurrentUserID] = useState<number>(1); // Placeholder user ID
-
   // Add a card to the current deck
-  const handleAddCard = () => {
-    if (currentFront.trim() && currentBack.trim()) {
-      setFrontTexts([...frontTexts, currentFront]);
-      setBackTexts([...backTexts, currentBack]);
+  // const handleAddCard = () => {
+  //   if (currentFront.trim() && currentBack.trim()) {
+  //     setFrontTexts([...frontTexts, currentFront]);
+  //     setBackTexts([...backTexts, currentBack]);
 
-      // Clear input fields
-      setCurrentFront('');
-      setCurrentBack('');
-    }
-  };
+  //     // Clear input fields
+  //     setCurrentFront('');
+  //     setCurrentBack('');
+  //   }
+  // };
 
   // Save the entire deck
-  const handleSaveDeck = async () => {
-    if (deckName.trim() && frontTexts.length > 0) {
-      try {
-        // Prepare the deck object
-        const newDeck: Deck = {
-          ownerID: currentUserID,
-          user_saved: [], // Initially empty
-          Front: frontTexts,
-          Back: backTexts
-        };
+  // const handleSaveDeck = async () => {
+  //   if (deckName.trim() && frontTexts.length > 0) {
+  //     try {
+  //       // Prepare the deck object
+  //       const newDeck: Deck = {
+  //         ownerID: currentUserID,
+  //         user_saved: [], // Initially empty
+  //         Front: frontTexts,
+  //         Back: backTexts
+  //       };
 
-        // Insert the deck
-        const { data, error } = await supabase
-          .from('decks')
-          .insert(newDeck)
-          .select();
+  //       // Insert the deck
+  //       const { data, error } = await supabase
+  //         .from('decks')
+  //         .insert(newDeck)
+  //         .select();
 
-        if (error) throw error;
+  //       if (error) throw error;
 
-        // Reset form
-        setFrontTexts([]);
-        setBackTexts([]);
-        setDeckName('');
-        alert('Deck saved successfully!');
-      } catch (error) {
-        console.error('Error saving deck:', error);
-        alert('Failed to save deck');
-      }
-    }
-  };
+  //       // Reset form
+  //       setFrontTexts([]);
+  //       setBackTexts([]);
+  //       setDeckName('');
+  //       alert('Deck saved successfully!');
+  //     } catch (error) {
+  //       console.error('Error saving deck:', error);
+  //       alert('Failed to save deck');
+  //     }
+  //   }
+  // };
+
+  const [deck, setDeck] = useState<{ front: string, back: string }[] | undefined>(undefined);
+  const [deckId, setDeckId] = useState<string>("");
+  const lorem = "Labore commodi est et sit sint accusamus. Sed laudantium impedit similique quis cumque a et. Nulla sit ut impedit itaque cupiditate quasi doloribus. Perspiciatis dolores nulla saepe occaecati exercitationem consequuntur. Dignissimos iusto nihil aut. Aut sit pariatur officiis qui reiciendis aut officiis et.";
 
   // Remove a card from the current deck
-  const handleRemoveCard = (index: number) => {
-    const newFrontTexts = [...frontTexts];
-    const newBackTexts = [...backTexts];
+  // const handleRemoveCard = (index: number) => {
+  //   const newFrontTexts = [...frontTexts];
+  //   const newBackTexts = [...backTexts];
 
-    newFrontTexts.splice(index, 1);
-    newBackTexts.splice(index, 1);
+  //   newFrontTexts.splice(index, 1);
+  //   newBackTexts.splice(index, 1);
 
-    setFrontTexts(newFrontTexts);
-    setBackTexts(newBackTexts);
-  };
+  //   setFrontTexts(newFrontTexts);
+  //   setBackTexts(newBackTexts);
+  // };
+
+  useEffect(() => {
+
+  }, [])
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Top Navigation Bar */}
       <NavigationBar />
 
-      <div className="container mx-auto p-6 flex-1">
-        <h1 className="text-2xl font-bold mb-6 text-center text-purple-500">Create Study Card Deck</h1>
+      <div className="container mx-auto flex-1">
+        {/*TODO: pull text data from loaded deck obj*/}
+        <div className='flex flex-row'>
+          <h1 className="text-2xl font-bold mb-4">New Deck</h1>
+          <Button variant='ghost' size='sm' className='ml-2'>Edit Name</Button>
+          <Button variant='ghost' size='sm' className='ml-2'>Save</Button>
+        </div>
 
         <div className="grid grid-cols-2 gap-6">
-          {/* Front of Card Column */}
-          <div className="bg-gray-100 shadow-md rounded-lg p-4">
-            <h2 className="text-xl font-semibold mb-4 text-purple-600">Deck Details</h2>
-            <input
-              type="text"
-              placeholder="Deck Name"
-              value={deckName}
-              onChange={(e) => setDeckName(e.target.value)}
-              className="w-full mb-4 p-2 border rounded focus:ring-2 focus:ring-purple-300"
-            />
-            <textarea
-              placeholder="Enter front side text"
-              value={currentFront}
-              onChange={(e) => setCurrentFront(e.target.value)}
-              className="w-full h-40 p-2 border rounded mb-4 focus:ring-2 focus:ring-purple-300"
-            />
-          </div>
+          <Textarea
+            label="New card front"
+            value={currentFront}
+            onChange={(e) => setCurrentFront(e.target.value)}
+            className="w-full"
+            labelPlacement="outside"
+          />
+          <Textarea
+            label="New card back"
+            value={currentBack}
+            onChange={(e) => setCurrentBack(e.target.value)}
+            className="w-full"
+            labelPlacement="outside"
+          />
+        </div>
+        <Button variant='ghost' size='sm' className='mt-2'>Add</Button>
+        <Button variant='ghost' size='sm' className='mt-2 ml-2'>Clear</Button>
+        <hr className='my-6' />
 
-          {/* Back of Card Column */}
-          <div className="bg-gray-100 shadow-md rounded-lg p-4">
-            <h2 className="text-xl font-semibold mb-4 text-purple-600">Card Back</h2>
-            <textarea
-              placeholder="Enter back side text"
-              value={currentBack}
-              onChange={(e) => setCurrentBack(e.target.value)}
-              className="w-full h-40 p-2 border rounded mb-4 focus:ring-2 focus:ring-purple-300"
-            />
-
-            <div className="flex space-x-4">
-              <Button
-                variant="flat"
-                onClick={handleAddCard}
-                disabled={!currentFront.trim() || !currentBack.trim()}
-                className="flex-1"
-              >
-                Add Card
-              </Button>
-              <Button
-                variant="flat"
-                onClick={handleSaveDeck}
-                disabled={!deckName.trim() || frontTexts.length === 0}
-                className="flex-1"
-              >
-                Save Deck
-              </Button>
+        {/* Card Preview */}
+        <h1 className="font-bold mb-4">Added cards</h1>
+        <div className='flex flex-col'>
+          <div className="container mx-auto">
+            <div className='container flex flex-row gap-6'>
+              <div className='flex flex-col justify-center'>
+                <p className='text-sm text-center'>1</p>
+                <Button variant='ghost' size='sm' className='mt-2'>Edit</Button>
+                <Button variant='ghost' size='sm' className='mt-2'>Delete</Button>
+              </div>
+              <Textarea
+                label="Front"
+                value={lorem}
+                className="w-full"
+                labelPlacement="outside"
+                isReadOnly
+              />
+              <Textarea
+                label="Back"
+                value={lorem}
+                className="w-full"
+                labelPlacement="outside"
+                isReadOnly
+              />
             </div>
           </div>
         </div>
+        <Button variant='ghost' size='sm' className='mt-2'>Save</Button>
 
-        {/* Card Preview Section */}
-        <div className="mt-6">
-          <h2 className="text-xl font-semibold mb-4 text-purple-600">Current Deck Cards</h2>
+        {/*        <div className="mt-6">
+          <h2 className="text-xl font-semibold mb-4 text-purple-600">Added cards</h2>
           <div className="grid grid-cols-3 gap-4">
             {frontTexts.map((front, index) => (
               <div
@@ -171,9 +164,9 @@ const StudyCardDeckCreator: React.FC = () => {
             ))}
           </div>
         </div>
-      </div>
+*/}      </div>
     </div>
   );
 };
 
-export default StudyCardDeckCreator;
+export default Editor;
