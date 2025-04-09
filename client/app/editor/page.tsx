@@ -8,42 +8,13 @@ import { Input, Textarea } from '@heroui/input';
 import { groupDataFocusVisibleClasses } from '@heroui/theme';
 import { Database } from '@/types/database.types';
 import { useUserContext } from '@/contexts/UserProvider';
+import { useQueryContext } from '@/contexts/QueryProvider';
+import { v4 as uuid } from 'uuid';
 
 const Editor: React.FC = () => {
   const router = useRouter();
   const session = useUserContext();
-
-  // Save the entire deck
-  // const handleSaveDeck = async () => {
-  //   if (deckName.trim() && frontTexts.length > 0) {
-  //     try {
-  //       // Prepare the deck object
-  //       const newDeck: Deck = {
-  //         ownerID: currentUserID,
-  //         user_saved: [], // Initially empty
-  //         Front: frontTexts,
-  //         Back: backTexts
-  //       };
-
-  //       // Insert the deck
-  //       const { data, error } = await supabase
-  //         .from('decks')
-  //         .insert(newDeck)
-  //         .select();
-
-  //       if (error) throw error;
-
-  //       // Reset form
-  //       setFrontTexts([]);
-  //       setBackTexts([]);
-  //       setDeckName('');
-  //       alert('Deck saved successfully!');
-  //     } catch (error) {
-  //       console.error('Error saving deck:', error);
-  //       alert('Failed to save deck');
-  //     }
-  //   }
-  // };
+  const query = useQueryContext();
 
   type Card = { front: string, back: string }
 
@@ -53,19 +24,37 @@ const Editor: React.FC = () => {
   const [currentCard, setCurrentCard] = useState<Card>({ front: "", back: "" });
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isNewDeck, setIsNewDeck] = useState<boolean>(true);
-  const lorem = "Labore commodi est et sit sint accusamus. Sed laudantium impedit similique quis cumque a et. Nulla sit ut impedit itaque cupiditate quasi doloribus. Perspiciatis dolores nulla saepe occaecati exercitationem consequuntur. Dignissimos iusto nihil aut. Aut sit pariatur officiis qui reiciendis aut officiis et.";
 
-  // 1. If passed a deck id, load the deck; if not, fill in inputs for a new deck
-  // 2. If passed a deck id, db query deck and load into local state, render an error warning if error
-  // Update deck name col when name save button is pressed
-  // Implement edit buttons
-  // Implement delete buttons
-  // Update db row when deck save button is pressed
+  // TODO:
+  // 1. see if deck uuid is passed to url search parameters
+  // -> fetch deck, load into state, render
+  // -> add proper save functionality
+  // 2. once new deck is created, update search parameters with new deck uuid, and fetch newly created deck
+  // -> editing functionality should work
 
   const handleAddCard = () => {
     setDeck([...deck, currentCard]);
     setCurrentCard({ front: "", back: "" })
-    console.log(deck)
+  }
+
+  const handleEditCardFront = (index: number, e: any) => {
+    setDeck(deck.map(card => {
+      if (card === deck.at(index)) {
+        return { ...card, front: e.target.value }
+      } else {
+        return card;
+      }
+    }))
+  }
+
+  const handleEditCardBack = (index: number, e: any) => {
+    setDeck(deck.map(card => {
+      if (card === deck.at(index)) {
+        return { ...card, back: e.target.value }
+      } else {
+        return card;
+      }
+    }))
   }
 
   const handleDeleteCard = (index: number) => {
@@ -74,20 +63,32 @@ const Editor: React.FC = () => {
     setDeck([...deck])
   }
 
-  const handleEditCard = () => {
-    setIsEditing(!isEditing);
-  }
-
   const handleClearNewCard = () => {
     setCurrentCard({ front: "", back: "" })
   }
 
-  const handleSaveDeck = () => {
-    setIsEditing(!isEditing);
-  }
-
   const handleCreateDeck = () => {
     setIsNewDeck(!isNewDeck);
+  }
+
+  const handleUpsertDeck = () => {
+    if (!session?.user) return;
+
+    setIsEditing(!isEditing);
+
+    const newDeck: Database["public"]["Tables"]["decks"]["Row"] = {
+      id: uuid(),
+      author: session?.user.id,
+      name: deckName,
+      cards: [...deck],
+      total_cards: deck.length
+    }
+
+    query?.upsertDeck(newDeck);
+  }
+
+  const handleEditDeck = () => {
+    setIsEditing(!isEditing);
   }
 
   const handleDeleteDeck = () => {
@@ -98,6 +99,10 @@ const Editor: React.FC = () => {
   }
 
   useEffect(() => {
+    if (session?.user) {
+      console.log("hit")
+      query?.getUserDecks(session?.user?.id);
+    }
   }, [])
 
   return (
@@ -144,18 +149,20 @@ const Editor: React.FC = () => {
                 variant='bordered'
                 value={deckName}
                 onValueChange={setDeckName}
-                isClearable
+                isClearable={isEditing || isNewDeck}
+                isReadOnly={!isEditing && !isNewDeck}
+                isDisabled={!isEditing && !isNewDeck}
               />
               <>
                 {isNewDeck ? (
-                  <Button variant='ghost' size='sm' onPress={() => handleCreateDeck()}>Create Deck</Button>
+                  <Button variant='ghost' size='sm' onPress={() => handleUpsertDeck()}>Create Deck</Button>
                 ) : (
                   <>
                     {!isEditing ? (
-                      <Button variant='ghost' size='sm' onPress={() => handleEditCard()}>Edit Deck</Button>
+                      <Button variant='ghost' size='sm' onPress={() => handleEditDeck()}>Edit Deck</Button>
                     ) : (
                       <>
-                        <Button variant='ghost' size='sm' onPress={() => handleSaveDeck()}>Save Deck</Button>
+                        <Button variant='ghost' size='sm' onPress={() => handleEditDeck()}>Save Deck</Button>
                         <Button variant='ghost' size='sm' onPress={() => handleDeleteDeck()}>Delete Deck</Button>
                       </>
                     )}
@@ -178,16 +185,18 @@ const Editor: React.FC = () => {
                       className="w-full"
                       labelPlacement="outside"
                       variant='bordered'
-                      isReadOnly
-                      isDisabled={!isEditing}
+                      onChange={(e) => handleEditCardFront(index, e)}
+                      isReadOnly={!isEditing && !isNewDeck}
+                      isDisabled={!isEditing && !isNewDeck}
                     />
                     <Textarea
                       value={card.back}
                       className="w-full"
                       labelPlacement="outside"
                       variant='bordered'
-                      isReadOnly
-                      isDisabled={!isEditing}
+                      onChange={(e) => handleEditCardBack(index, e)}
+                      isReadOnly={!isEditing && !isNewDeck}
+                      isDisabled={!isEditing && !isNewDeck}
                     />
                   </div>
                 </div>
