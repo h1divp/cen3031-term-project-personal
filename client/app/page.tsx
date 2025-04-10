@@ -45,7 +45,9 @@ export default function Home() {
               </div>
               <div className="grow bg-gray-100 p-4 mt-4 rounded-lg">
                 <h2 className="text-xl font-bold mb-4">Your Decks</h2>
-                <Card title="Create deck" details="" onClick={() => { router.push("/editor") }} isMenuOpt />
+                <div className="flex flex-col center-items">
+                  <Card title="Create deck" details="" onClick={() => { router.push("/editor") }} isMenuOpt />
+                </div>
               </div>
             </div>
           </div>

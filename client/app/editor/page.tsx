@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from "@heroui/button";
 import { NavigationBar } from '@/components/Navbar';
 import { Input, Textarea } from '@heroui/input';
@@ -10,16 +10,18 @@ import { Database } from '@/types/database.types';
 import { useUserContext } from '@/contexts/UserProvider';
 import { useQueryContext } from '@/contexts/QueryProvider';
 import { v4 as uuid } from 'uuid';
+import { UUID } from 'crypto';
 
 const Editor: React.FC = () => {
   const router = useRouter();
   const session = useUserContext();
   const query = useQueryContext();
+  const searchParams = useSearchParams();
 
   type Card = { front: string, back: string }
 
   const [deck, setDeck] = useState<Card[]>([]);
-  const [deckId, setDeckId] = useState<string>("");
+  const [deckUuid, setDeckUuid] = useState<string | null>(null);
   const [deckName, setDeckName] = useState<string>("New Deck");
   const [currentCard, setCurrentCard] = useState<Card>({ front: "", back: "" });
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -31,6 +33,14 @@ const Editor: React.FC = () => {
   // -> add proper save functionality
   // 2. once new deck is created, update search parameters with new deck uuid, and fetch newly created deck
   // -> editing functionality should work
+  // 3. Make sure editable decks can only be editable by author
+  // (leads to idea for public / private deck)
+  // SAVE: only upsert if content has changed.
+
+  // TODO UI:
+  // make sure cards cant be added when front and back are blank
+  // create a way to show error messages on screen
+  // disable clear button if there is no text content
 
   const handleAddCard = () => {
     setDeck([...deck, currentCard]);
@@ -67,17 +77,16 @@ const Editor: React.FC = () => {
     setCurrentCard({ front: "", back: "" })
   }
 
-  const handleCreateDeck = () => {
-    setIsNewDeck(!isNewDeck);
-  }
-
   const handleUpsertDeck = () => {
     if (!session?.user) return;
 
     setIsEditing(!isEditing);
 
+    const upsertDeckUuid = deckUuid ?? uuid();
+    // because a deck query will throw once the deckUuid changes because of a [deckUuid] useEffect, we have to set it at the end in case if its a new deck. This const is either set to the existing deckUuid if it has already been passed to the page through a search parameter, or generates a new one if it is undefined. The operator used is called a Nullish Coalescing operator.
+
     const newDeck: Database["public"]["Tables"]["decks"]["Row"] = {
-      id: uuid(),
+      id: upsertDeckUuid,
       author: session?.user.id,
       name: deckName,
       cards: [...deck],
@@ -85,25 +94,51 @@ const Editor: React.FC = () => {
     }
 
     query?.upsertDeck(newDeck);
+
+    if (isNewDeck) {
+      setIsNewDeck(false);
+      setDeckUuid(upsertDeckUuid);
+    }
   }
 
   const handleEditDeck = () => {
     setIsEditing(!isEditing);
   }
 
+  const loadDeckFromUuid = () => {
+    if (!deckUuid) return;
+    // if (isNewDeck) return;
+    query?.getDeckById(deckUuid).then(res => {
+      // TODO: validate json
+      console.log(res);
+      setDeck(res[0].cards);
+      setDeckName(res[0].name);
+      setIsNewDeck(false);
+    });
+  }
+
   const handleDeleteDeck = () => {
+    if (!deckUuid) return;
     setDeck([]);
     setDeckName("New Deck");
     setIsEditing(false);
     setIsNewDeck(true);
+    query?.deleteDeckById(deckUuid);
   }
 
   useEffect(() => {
-    if (session?.user) {
-      console.log("hit")
-      query?.getUserDecks(session?.user?.id);
-    }
-  }, [])
+    // If a deck is passed as a search parameter in url, fetch the deck.
+    if (!session?.user) return;
+    const param = searchParams.get("deck");
+    setDeckUuid(param); // will stay as null if it doesn't exist. Useful for later checks.
+    console.log("deck parameter:", param);
+  }, [session])
+
+  useEffect(() => {
+    if (!deckUuid) return;
+    query?.getDeckById(deckUuid);
+    loadDeckFromUuid();
+  }, [deckUuid])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -132,7 +167,12 @@ const Editor: React.FC = () => {
           />
         </div>
         <div className='flex flex-row mt-2 gap-2'>
-          <Button variant='ghost' size='sm' onPress={() => handleAddCard()}>Add Card</Button>
+          <Button
+            variant='ghost'
+            size='sm'
+            onPress={() => handleAddCard()}
+            isDisabled={!isEditing && !isNewDeck}
+          >Add Card</Button>
           <Button variant='ghost' size='sm' onPress={() => handleClearNewCard()}>Clear</Button>
         </div>
 
@@ -162,7 +202,7 @@ const Editor: React.FC = () => {
                       <Button variant='ghost' size='sm' onPress={() => handleEditDeck()}>Edit Deck</Button>
                     ) : (
                       <>
-                        <Button variant='ghost' size='sm' onPress={() => handleEditDeck()}>Save Deck</Button>
+                        <Button variant='ghost' size='sm' onPress={() => handleUpsertDeck()}>Save Deck</Button>
                         <Button variant='ghost' size='sm' onPress={() => handleDeleteDeck()}>Delete Deck</Button>
                       </>
                     )}
