@@ -30,7 +30,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     if (user) {
       setUser(user)
     }
-    console.log("user id", user?.id);
   }
 
   const signOut = () => {
