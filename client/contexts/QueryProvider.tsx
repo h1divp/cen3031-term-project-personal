@@ -41,9 +41,10 @@ export const QueryProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const getUserDecks = async (id: Database["public"]["Tables"]["user_storage"]["Row"]["id"]) => {
-    const { data, error } = await supabase.from("decks").select().eq("author", id);
+    const { data, error } = await supabase.from("decks").select('*').eq("author", id);
     if (data) setUserDecks(data);
     if (error) console.log(error);
+    return data || []
   }
 
   const getDeckById = async (deckId: Database["public"]["Tables"]["decks"]["Row"]["id"]) => {

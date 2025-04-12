@@ -17,9 +17,13 @@ const Editor: React.FC = () => {
   const session = useUserContext();
   const query = useQueryContext();
   const searchParams = useSearchParams();
+  const [originalDeck, setOriginalDeck] = useState<Card[]>([]);
+const [originalDeckName, setOriginalDeckName] = useState<string>("New Deck");
 
   type Card = { front: string, back: string }
-
+  const isCardEmpty = (card: Card): boolean => {
+    return card.front.trim() === "" || card.back.trim() === "";
+  }
   const [deck, setDeck] = useState<Card[]>([]);
   const [deckUuid, setDeckUuid] = useState<string | null>(null);
   const [deckName, setDeckName] = useState<string>("New Deck");
@@ -41,8 +45,25 @@ const Editor: React.FC = () => {
   // make sure cards cant be added when front and back are blank
   // create a way to show error messages on screen
   // disable clear button if there is no text content
+  const isDeckChanged = (): boolean => {
+    if (deckName !== originalDeckName) return true;
+    if (deck.length !== originalDeck.length) return true;
+    
+    // Compare each card in the deck
+    for (let i = 0; i < deck.length; i++) {
+      if (deck[i].front !== originalDeck[i].front || deck[i].back !== originalDeck[i].back) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
 
   const handleAddCard = () => {
+    if(isCardEmpty(currentCard)){
+      //add error message
+      return;
+    }
     setDeck([...deck, currentCard]);
     setCurrentCard({ front: "", back: "" })
   }
@@ -79,6 +100,12 @@ const Editor: React.FC = () => {
 
   const handleUpsertDeck = () => {
     if (!session?.user) return;
+
+  // If deck hasn't changed and it's not a new deck, no need to save
+  if (!isNewDeck && !isDeckChanged()) {
+    setIsEditing(false);
+    return;
+  }
 
     setIsEditing(!isEditing);
 
@@ -171,7 +198,7 @@ const Editor: React.FC = () => {
             variant='ghost'
             size='sm'
             onPress={() => handleAddCard()}
-            isDisabled={!isEditing && !isNewDeck}
+            isDisabled={!isEditing && !isNewDeck || isCardEmpty(currentCard)}
           >Add Card</Button>
           <Button variant='ghost' size='sm' onPress={() => handleClearNewCard()}>Clear</Button>
         </div>
@@ -202,7 +229,7 @@ const Editor: React.FC = () => {
                       <Button variant='ghost' size='sm' onPress={() => handleEditDeck()}>Edit Deck</Button>
                     ) : (
                       <>
-                        <Button variant='ghost' size='sm' onPress={() => handleUpsertDeck()}>Save Deck</Button>
+                        <Button variant='ghost' size='sm' onPress={() => handleUpsertDeck()}isDisabled={!isDeckChanged()}>Save Deck</Button>
                         <Button variant='ghost' size='sm' onPress={() => handleDeleteDeck()}>Delete Deck</Button>
                       </>
                     )}
