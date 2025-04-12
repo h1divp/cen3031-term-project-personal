@@ -39,15 +39,15 @@ const DeckList = () => {
   if (!decks.length) return <p>No decks found.</p>;
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-4">
       {decks.map((deck) => (
         <Card
-                    key={deck.id}
-                    title={deck.name || "Untitled Deck"}
-                    details={`${deck.cards?.length || 0} cards`}
-                    onClick={() => router.push(`/editor?deck=${deck.id}`)}
-                    isMenuOpt={false}
-                  />
+          key={deck.id}
+          title={deck.name || "Untitled Deck"}
+          details={`${deck.cards?.length || 0} card${deck.cards && deck.cards?.length > 1 ? `s` : ``}`}
+          onClick={() => router.push(`/editor?deck=${deck.id}`)}
+          isMenuOpt={false}
+        />
       ))}
     </div>
   );
