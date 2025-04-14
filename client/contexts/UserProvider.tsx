@@ -6,6 +6,9 @@ type UserContextType = {
   user?: User;
   getSessionData: () => void;
   signOut: () => void;
+  changeEmail: (string) => void;
+  changeUsername: (string) => void;
+  changePassword: (string) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -31,6 +34,18 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(user)
     }
   }
+    
+  const changeUsername = async (newUsername) => {
+    supabase.auth.updateUser({  data: { display_name: newUsername }});
+  }
+
+  const changePassword = async (newPassword) => {
+    supabase.auth.updateUser({password: newPassword});
+  }
+
+  const changeEmail = async (newEmail) => {
+    supabase.auth.updateUser({email: newEmail});
+  }
 
   const signOut = () => {
     supabase.auth.signOut()
@@ -38,7 +53,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <UserContext.Provider value={{ user, getSessionData, signOut }} >
+    <UserContext.Provider value={{ user, getSessionData, signOut, changeEmail, changeUsername, changePassword }} >
       {children}
     </UserContext.Provider>
   )
