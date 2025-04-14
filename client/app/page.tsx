@@ -53,7 +53,7 @@ export default function Home() {
                 <h2 className="text-xl font-bold mb-4">Account</h2>
                 <AccountSection />
               </div>
-              <div className="grow bg-gray-100 p-4 mt-4 rounded-lg">
+              <div className="grow bg-gray-100 p-4 mt-4 rounded-lg scroll-auto">
                 <h2 className="text-xl font-bold mb-4">Your Decks</h2>
                 <UserDecksSection />
                 <div className="flex flex-col center-items">

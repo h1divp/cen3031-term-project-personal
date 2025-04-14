@@ -17,19 +17,16 @@ const Editor: React.FC = () => {
   const session = useUserContext();
   const query = useQueryContext();
   const searchParams = useSearchParams();
-  const [originalDeck, setOriginalDeck] = useState<Card[]>([]);
-const [originalDeckName, setOriginalDeckName] = useState<string>("New Deck");
 
   type Card = { front: string, back: string }
-  const isCardEmpty = (card: Card): boolean => {
-    return card.front.trim() === "" || card.back.trim() === "";
-  }
+
   const [deck, setDeck] = useState<Card[]>([]);
   const [deckUuid, setDeckUuid] = useState<string | null>(null);
   const [deckName, setDeckName] = useState<string>("New Deck");
   const [currentCard, setCurrentCard] = useState<Card>({ front: "", back: "" });
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isNewDeck, setIsNewDeck] = useState<boolean>(true);
+  const [deckHasChanged, setDeckHasChanged] = useState<boolean>(false);
 
   // TODO:
   // 1. see if deck uuid is passed to url search parameters
@@ -39,33 +36,25 @@ const [originalDeckName, setOriginalDeckName] = useState<string>("New Deck");
   // -> editing functionality should work
   // 3. Make sure editable decks can only be editable by author
   // (leads to idea for public / private deck)
-  // SAVE: only upsert if content has changed.
 
   // TODO UI:
   // make sure cards cant be added when front and back are blank
   // create a way to show error messages on screen
   // disable clear button if there is no text content
-  const isDeckChanged = (): boolean => {
-    if (deckName !== originalDeckName) return true;
-    if (deck.length !== originalDeck.length) return true;
-    
-    // Compare each card in the deck
-    for (let i = 0; i < deck.length; i++) {
-      if (deck[i].front !== originalDeck[i].front || deck[i].back !== originalDeck[i].back) {
-        return true;
-      }
-    }
-    
-    return false;
+
+  const isCardEmpty = (): boolean => {
+    return currentCard.front.trim() === "" || currentCard.back.trim() === "";
+  }
+
+  const cardHasText = (): boolean => {
+    return currentCard.front.trim() !== "" || currentCard?.back.trim() !== ""
   }
 
   const handleAddCard = () => {
-    if(isCardEmpty(currentCard)){
-      //add error message
-      return;
-    }
     setDeck([...deck, currentCard]);
     setCurrentCard({ front: "", back: "" })
+    setDeckHasChanged(true);
+    console.log("change");
   }
 
   const handleEditCardFront = (index: number, e: any) => {
@@ -76,6 +65,7 @@ const [originalDeckName, setOriginalDeckName] = useState<string>("New Deck");
         return card;
       }
     }))
+    setDeckHasChanged(true);
   }
 
   const handleEditCardBack = (index: number, e: any) => {
@@ -86,12 +76,15 @@ const [originalDeckName, setOriginalDeckName] = useState<string>("New Deck");
         return card;
       }
     }))
+    setDeckHasChanged(true);
   }
 
   const handleDeleteCard = (index: number) => {
     if (index < 0 || index >= deck.length) return;
     deck.splice(index, 1);
     setDeck([...deck])
+    setDeckHasChanged(true);
+    console.log("change");
   }
 
   const handleClearNewCard = () => {
@@ -100,12 +93,6 @@ const [originalDeckName, setOriginalDeckName] = useState<string>("New Deck");
 
   const handleUpsertDeck = () => {
     if (!session?.user) return;
-
-  // If deck hasn't changed and it's not a new deck, no need to save
-  if (!isNewDeck && !isDeckChanged()) {
-    setIsEditing(false);
-    return;
-  }
 
     setIsEditing(!isEditing);
 
@@ -120,16 +107,29 @@ const [originalDeckName, setOriginalDeckName] = useState<string>("New Deck");
       total_cards: deck.length
     }
 
-    query?.upsertDeck(newDeck);
+    try {
+      query?.upsertDeck(newDeck);
+      setDeckHasChanged(false);
+    } catch (e) {
+      setDeckHasChanged(true);
+      console.log("Error upserting deck");
+    }
 
     if (isNewDeck) {
       setIsNewDeck(false);
+      setIsEditing(false);
       setDeckUuid(upsertDeckUuid);
     }
   }
 
   const handleEditDeck = () => {
     setIsEditing(!isEditing);
+  }
+
+  const handleDeckNameChange = (e: any) => {
+    setDeckName(e);
+    setDeckHasChanged(true);
+    console.log("change");
   }
 
   const loadDeckFromUuid = () => {
@@ -151,6 +151,7 @@ const [originalDeckName, setOriginalDeckName] = useState<string>("New Deck");
     setIsEditing(false);
     setIsNewDeck(true);
     query?.deleteDeckById(deckUuid);
+    router.push("/");
   }
 
   useEffect(() => {
@@ -198,9 +199,9 @@ const [originalDeckName, setOriginalDeckName] = useState<string>("New Deck");
             variant='ghost'
             size='sm'
             onPress={() => handleAddCard()}
-            isDisabled={!isEditing && !isNewDeck || isCardEmpty(currentCard)}
+            isDisabled={!isEditing && !isNewDeck || isCardEmpty()}
           >Add Card</Button>
-          <Button variant='ghost' size='sm' onPress={() => handleClearNewCard()}>Clear</Button>
+          <Button variant='ghost' size='sm' onPress={() => handleClearNewCard()} isDisabled={!cardHasText()}>Clear</Button>
         </div>
 
         {/* Deck Preview */}
@@ -215,7 +216,7 @@ const [originalDeckName, setOriginalDeckName] = useState<string>("New Deck");
                 size='sm'
                 variant='bordered'
                 value={deckName}
-                onValueChange={setDeckName}
+                onValueChange={(e) => { handleDeckNameChange(e) }}
                 isClearable={isEditing || isNewDeck}
                 isReadOnly={!isEditing && !isNewDeck}
                 isDisabled={!isEditing && !isNewDeck}
@@ -229,7 +230,7 @@ const [originalDeckName, setOriginalDeckName] = useState<string>("New Deck");
                       <Button variant='ghost' size='sm' onPress={() => handleEditDeck()}>Edit Deck</Button>
                     ) : (
                       <>
-                        <Button variant='ghost' size='sm' onPress={() => handleUpsertDeck()}isDisabled={!isDeckChanged()}>Save Deck</Button>
+                        <Button variant='ghost' size='sm' onPress={() => handleUpsertDeck()} isDisabled={!deckHasChanged}>Save Deck</Button>
                         <Button variant='ghost' size='sm' onPress={() => handleDeleteDeck()}>Delete Deck</Button>
                       </>
                     )}
