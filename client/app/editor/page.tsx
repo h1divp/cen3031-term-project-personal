@@ -6,7 +6,7 @@ import { Button } from "@heroui/button";
 import { NavigationBar } from '@/components/Navbar';
 import { Input, Textarea } from '@heroui/input';
 import { groupDataFocusVisibleClasses } from '@heroui/theme';
-import { Database } from '@/types/database.types';
+import { Database, Tables } from '@/types/database.types';
 import { useUserContext } from '@/contexts/UserProvider';
 import { useQueryContext } from '@/contexts/QueryProvider';
 import { v4 as uuid } from 'uuid';
@@ -29,18 +29,11 @@ const Editor: React.FC = () => {
   const [deckHasChanged, setDeckHasChanged] = useState<boolean>(false);
 
   // TODO:
-  // 1. see if deck uuid is passed to url search parameters
-  // -> fetch deck, load into state, render
-  // -> add proper save functionality
-  // 2. once new deck is created, update search parameters with new deck uuid, and fetch newly created deck
-  // -> editing functionality should work
-  // 3. Make sure editable decks can only be editable by author
-  // (leads to idea for public / private deck)
+  // Make sure editable decks can only be editable by author
+  // - (leads to idea for public / private deck)
 
   // TODO UI:
-  // make sure cards cant be added when front and back are blank
   // create a way to show error messages on screen
-  // disable clear button if there is no text content
 
   const isCardEmpty = (): boolean => {
     return currentCard.front.trim() === "" || currentCard.back.trim() === "";
@@ -97,9 +90,9 @@ const Editor: React.FC = () => {
     setIsEditing(!isEditing);
 
     const upsertDeckUuid = deckUuid ?? uuid();
-    // because a deck query will throw once the deckUuid changes because of a [deckUuid] useEffect, we have to set it at the end in case if its a new deck. This const is either set to the existing deckUuid if it has already been passed to the page through a search parameter, or generates a new one if it is undefined. The operator used is called a Nullish Coalescing operator.
+    // Because a deck query will throw once the deckUuid changes because of a [deckUuid] useEffect, we have to set it at the end in case if its a new deck. This const is either set to the existing deckUuid if it has already been passed to the page through a search parameter, or generates a new one if it is undefined. The operator used is called a Nullish Coalescing operator.
 
-    const newDeck: Database["public"]["Tables"]["decks"]["Row"] = {
+    const newDeck: Tables<"decks"> = {
       id: upsertDeckUuid,
       author: session?.user.id,
       name: deckName,
@@ -132,16 +125,17 @@ const Editor: React.FC = () => {
     console.log("change");
   }
 
-  const loadDeckFromUuid = () => {
+  const loadDeckFromUuid = async () => {
     if (!deckUuid) return;
     // if (isNewDeck) return;
-    query?.getDeckById(deckUuid).then(res => {
-      // TODO: validate json
-      console.log(res);
-      setDeck(res[0].cards);
-      setDeckName(res[0].name);
-      setIsNewDeck(false);
-    });
+    // query?.getDeckById(deckUuid).then(res => {
+    // TODO: validate json
+    const res: any = await query?.getDeckById(deckUuid);
+    console.log(res);
+    setDeck(res[0].cards);
+    setDeckName(res[0].name);
+    setIsNewDeck(false);
+    // });
   }
 
   const handleDeleteDeck = () => {

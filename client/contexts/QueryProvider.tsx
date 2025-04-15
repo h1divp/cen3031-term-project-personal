@@ -6,6 +6,7 @@ type QueryContextType = {
   userData: Tables<"user_storage"> | undefined;
   getUserStorageRowFromId: (id: Tables<"user_storage">["id"]) => void;
   getUserDecks: (id: Tables<"user_storage">["id"]) => void;
+  getRecentDecks: () => void;
   getDeckById: (id: Tables<"decks">["id"]) => void;
   upsertDeck: (deck: Tables<"decks">) => void;
   deleteDeckById: (deckId: Tables<"decks">["id"]) => void;
@@ -36,9 +37,15 @@ export const QueryProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const getUserDecks = async (userId: Tables<"user_storage">["id"]) => {
-    const { data, error } = await supabase.from("decks").select('*').eq("author", userId);
+    const { data, error } = await supabase.from("decks").select().eq("author", userId).order("created_at", { ascending: false });
     if (error) console.log(error);
-    return data || [];
+    return data;
+  }
+
+  const getRecentDecks = async () => {
+    const { data, error } = await supabase.from("decks").select().limit(20).order("created_at", { ascending: false });
+    if (error) console.log(error);
+    return data;
   }
 
   const getDeckById = async (deckId: Tables<"decks">["id"]) => {
@@ -60,7 +67,7 @@ export const QueryProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <QueryContext.Provider value={{ userData, getUserStorageRowFromId, getUserDecks, getDeckById, upsertDeck, deleteDeckById }} >
+    <QueryContext.Provider value={{ userData, getUserStorageRowFromId, getUserDecks, getRecentDecks, getDeckById, upsertDeck, deleteDeckById }} >
       {children}
     </QueryContext.Provider>
   )
