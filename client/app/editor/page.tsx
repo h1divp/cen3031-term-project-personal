@@ -6,7 +6,7 @@ import { Button } from "@heroui/button";
 import { NavigationBar } from '@/components/Navbar';
 import { Input, Textarea } from '@heroui/input';
 import { groupDataFocusVisibleClasses } from '@heroui/theme';
-import { Database } from '@/types/database.types';
+import { Database, Tables } from '@/types/database.types';
 import { useUserContext } from '@/contexts/UserProvider';
 import { useQueryContext } from '@/contexts/QueryProvider';
 import { v4 as uuid } from 'uuid';
@@ -26,25 +26,28 @@ const Editor: React.FC = () => {
   const [currentCard, setCurrentCard] = useState<Card>({ front: "", back: "" });
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isNewDeck, setIsNewDeck] = useState<boolean>(true);
+  const [deckHasChanged, setDeckHasChanged] = useState<boolean>(false);
 
   // TODO:
-  // 1. see if deck uuid is passed to url search parameters
-  // -> fetch deck, load into state, render
-  // -> add proper save functionality
-  // 2. once new deck is created, update search parameters with new deck uuid, and fetch newly created deck
-  // -> editing functionality should work
-  // 3. Make sure editable decks can only be editable by author
-  // (leads to idea for public / private deck)
-  // SAVE: only upsert if content has changed.
+  // Make sure editable decks can only be editable by author
+  // - (leads to idea for public / private deck)
 
   // TODO UI:
-  // make sure cards cant be added when front and back are blank
   // create a way to show error messages on screen
-  // disable clear button if there is no text content
+
+  const isCardEmpty = (): boolean => {
+    return currentCard.front.trim() === "" || currentCard.back.trim() === "";
+  }
+
+  const cardHasText = (): boolean => {
+    return currentCard.front.trim() !== "" || currentCard?.back.trim() !== ""
+  }
 
   const handleAddCard = () => {
     setDeck([...deck, currentCard]);
     setCurrentCard({ front: "", back: "" })
+    setDeckHasChanged(true);
+    console.log("change");
   }
 
   const handleEditCardFront = (index: number, e: any) => {
@@ -55,6 +58,7 @@ const Editor: React.FC = () => {
         return card;
       }
     }))
+    setDeckHasChanged(true);
   }
 
   const handleEditCardBack = (index: number, e: any) => {
@@ -65,12 +69,15 @@ const Editor: React.FC = () => {
         return card;
       }
     }))
+    setDeckHasChanged(true);
   }
 
   const handleDeleteCard = (index: number) => {
     if (index < 0 || index >= deck.length) return;
     deck.splice(index, 1);
     setDeck([...deck])
+    setDeckHasChanged(true);
+    console.log("change");
   }
 
   const handleClearNewCard = () => {
@@ -83,9 +90,9 @@ const Editor: React.FC = () => {
     setIsEditing(!isEditing);
 
     const upsertDeckUuid = deckUuid ?? uuid();
-    // because a deck query will throw once the deckUuid changes because of a [deckUuid] useEffect, we have to set it at the end in case if its a new deck. This const is either set to the existing deckUuid if it has already been passed to the page through a search parameter, or generates a new one if it is undefined. The operator used is called a Nullish Coalescing operator.
+    // Because a deck query will throw once the deckUuid changes because of a [deckUuid] useEffect, we have to set it at the end in case if its a new deck. This const is either set to the existing deckUuid if it has already been passed to the page through a search parameter, or generates a new one if it is undefined. The operator used is called a Nullish Coalescing operator.
 
-    const newDeck: Database["public"]["Tables"]["decks"]["Row"] = {
+    const newDeck: Tables<"decks"> = {
       id: upsertDeckUuid,
       author: session?.user.id,
       name: deckName,
@@ -93,10 +100,17 @@ const Editor: React.FC = () => {
       total_cards: deck.length
     }
 
-    query?.upsertDeck(newDeck);
+    try {
+      query?.upsertDeck(newDeck);
+      setDeckHasChanged(false);
+    } catch (e) {
+      setDeckHasChanged(true);
+      console.log("Error upserting deck");
+    }
 
     if (isNewDeck) {
       setIsNewDeck(false);
+      setIsEditing(false);
       setDeckUuid(upsertDeckUuid);
     }
   }
@@ -105,16 +119,23 @@ const Editor: React.FC = () => {
     setIsEditing(!isEditing);
   }
 
-  const loadDeckFromUuid = () => {
+  const handleDeckNameChange = (e: any) => {
+    setDeckName(e);
+    setDeckHasChanged(true);
+    console.log("change");
+  }
+
+  const loadDeckFromUuid = async () => {
     if (!deckUuid) return;
     // if (isNewDeck) return;
-    query?.getDeckById(deckUuid).then(res => {
-      // TODO: validate json
-      console.log(res);
-      setDeck(res[0].cards);
-      setDeckName(res[0].name);
-      setIsNewDeck(false);
-    });
+    // query?.getDeckById(deckUuid).then(res => {
+    // TODO: validate json
+    const res: any = await query?.getDeckById(deckUuid);
+    console.log(res);
+    setDeck(res[0].cards);
+    setDeckName(res[0].name);
+    setIsNewDeck(false);
+    // });
   }
 
   const handleDeleteDeck = () => {
@@ -124,6 +145,7 @@ const Editor: React.FC = () => {
     setIsEditing(false);
     setIsNewDeck(true);
     query?.deleteDeckById(deckUuid);
+    router.push("/");
   }
 
   useEffect(() => {
@@ -171,9 +193,9 @@ const Editor: React.FC = () => {
             variant='ghost'
             size='sm'
             onPress={() => handleAddCard()}
-            isDisabled={!isEditing && !isNewDeck}
+            isDisabled={!isEditing && !isNewDeck || isCardEmpty()}
           >Add Card</Button>
-          <Button variant='ghost' size='sm' onPress={() => handleClearNewCard()}>Clear</Button>
+          <Button variant='ghost' size='sm' onPress={() => handleClearNewCard()} isDisabled={!cardHasText()}>Clear</Button>
         </div>
 
         {/* Deck Preview */}
@@ -188,7 +210,7 @@ const Editor: React.FC = () => {
                 size='sm'
                 variant='bordered'
                 value={deckName}
-                onValueChange={setDeckName}
+                onValueChange={(e) => { handleDeckNameChange(e) }}
                 isClearable={isEditing || isNewDeck}
                 isReadOnly={!isEditing && !isNewDeck}
                 isDisabled={!isEditing && !isNewDeck}
@@ -202,7 +224,7 @@ const Editor: React.FC = () => {
                       <Button variant='ghost' size='sm' onPress={() => handleEditDeck()}>Edit Deck</Button>
                     ) : (
                       <>
-                        <Button variant='ghost' size='sm' onPress={() => handleUpsertDeck()}>Save Deck</Button>
+                        <Button variant='ghost' size='sm' onPress={() => handleUpsertDeck()} isDisabled={!deckHasChanged}>Save Deck</Button>
                         <Button variant='ghost' size='sm' onPress={() => handleDeleteDeck()}>Delete Deck</Button>
                       </>
                     )}

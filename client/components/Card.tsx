@@ -7,11 +7,13 @@ export const Card = ({
   details,
   onClick,
   isMenuOpt,
+  isDisabled,
 }: {
   title: string;
   details: string;
   onClick?: () => void;
   isMenuOpt: boolean;
+  isDisabled?: boolean;
 }) => {
   return (
     <>
@@ -21,6 +23,7 @@ export const Card = ({
           variant="ghost"
           className="justify-center items-start h-auto"
           onClick={onClick}
+          isDisabled={isDisabled}
         >
           <div className="text-left my-1">
             <p className="font-medium">{title}</p>
@@ -34,6 +37,7 @@ export const Card = ({
           variant="flat"
           className="justify-start items-start h-auto"
           onClick={onClick}
+          isDisabled={isDisabled}
         >
           <div className="text-left my-1">
             <p className="font-medium">{title}</p>
