@@ -7,7 +7,7 @@ import { Avatar } from "@heroui/avatar";
 import { colorVariants } from "@heroui/theme";
 import { Input } from "@heroui/input";
 import { Button, ButtonGroup } from "@heroui/button";
-import { Accordion, AccordionItem} from "@heroui/accordion";
+import { Accordion, AccordionItem } from "@heroui/accordion";
 import { createClient } from '@/utils/supabase/client';
 import { User } from "@supabase/supabase-js";
 import { QueryKey, useQuery, UseQueryOptions } from "@tanstack/react-query";
@@ -51,7 +51,7 @@ export const AccountSection = () => {
 
   const changeUsernameOnClick = () => {
     session?.changeUsername(newUsername);
-    router.refresh();
+    // router.refresh();
   }
 
   const changePasswordOnClick = () => {
@@ -89,55 +89,52 @@ export const AccountSection = () => {
             </div>
             <Accordion>
               <AccordionItem key="1" title="Change Email">
-                <div className="flex flex-col place-content-around">
+                <div className="flex flex-col gap-2">
                   <Input
-                    label="Email"
+                    label="New email"
                     type="email"
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     required
-                    placeholder="Enter a new email"
                     variant="bordered"
                   />
                   <Button
-                    onPress={() => changeEmailOnClick()}                
+                    onPress={() => changeEmailOnClick()}
                   >Change Email</Button>
                 </div>
               </AccordionItem>
               <AccordionItem key="2" title="Change Username">
-                <div className="flex flex-col place-content-around">
+                <div className="flex flex-col gap-2">
                   <Input
-                    label="Username"
+                    label="New username"
                     type="text"
                     value={newUsername}
                     onChange={(e) => setNewUsername(e.target.value)}
                     required
-                    placeholder="Enter a new username"
                     variant="bordered"
                   />
                   <Button
-                    onPress={() => changeUsernameOnClick()}                
+                    onPress={() => changeUsernameOnClick()}
                   >Change Username</Button>
                 </div>
               </AccordionItem>
               <AccordionItem key="3" title="Change Password">
-                <div className="flex flex-col place-content-around">
+                <div className="flex flex-col gap-2">
                   {passError && (
                     <div className="text-red-500 text-sm text-center p-3 bg-red-50 rounded-md">
                       {passError}
                     </div>
                   )}
                   <Input
-                    label="Password"
+                    label="New password"
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
-                    placeholder="Enter a new password"
                     variant="bordered"
                   />
                   <Input
-                    label="Confirm password"
+                    label="Confirm new password"
                     type="password"
                     value={confirmNewPassword}
                     onChange={(e) => setConfirmNewPassword(e.target.value)}
@@ -146,7 +143,7 @@ export const AccountSection = () => {
                     variant="bordered"
                   />
                   <Button
-                    onPress={() => changePasswordOnClick()}                
+                    onPress={() => changePasswordOnClick()}
                   >Change Password</Button>
                 </div>
               </AccordionItem>

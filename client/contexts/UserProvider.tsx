@@ -34,17 +34,20 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(user)
     }
   }
-    
-  const changeUsername = async (newUsername) => {
-    supabase.auth.updateUser({  data: { display_name: newUsername }});
+
+  const changeUsername = async (newUsername: string) => {
+    const { error } = await supabase.auth.updateUser({ data: { display_name: newUsername } });
+    if (error) console.log(error);
   }
 
-  const changePassword = async (newPassword) => {
-    supabase.auth.updateUser({password: newPassword});
+  const changePassword = async (newPassword: string) => {
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) console.log(error);
   }
 
-  const changeEmail = async (newEmail) => {
-    supabase.auth.updateUser({email: newEmail});
+  const changeEmail = async (newEmail: string) => {
+    const { error } = await supabase.auth.updateUser({ email: newEmail });
+    if (error) console.log(error);
   }
 
   const signOut = () => {
