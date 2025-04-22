@@ -11,6 +11,7 @@ import { useUserContext } from '@/contexts/UserProvider';
 import { useQueryContext } from '@/contexts/QueryProvider';
 import { v4 as uuid } from 'uuid';
 import { UUID } from 'crypto';
+import { addToast } from "@heroui/toast";
 
 const Editor: React.FC = () => {
   const router = useRouter();
@@ -47,6 +48,7 @@ const Editor: React.FC = () => {
     setCurrentCard({ front: "", back: "" })
     setDeckHasChanged(true);
     console.log("change");
+    addToast({title: "Card changed!"})
   }
 
   const handleEditCardFront = (index: number, e: any) => {
@@ -58,6 +60,7 @@ const Editor: React.FC = () => {
       }
     }))
     setDeckHasChanged(true);
+    addToast({title: "Deck changed!"})
   }
 
   const handleEditCardBack = (index: number, e: any) => {
@@ -69,6 +72,7 @@ const Editor: React.FC = () => {
       }
     }))
     setDeckHasChanged(true);
+    addToast({title: "Deck changed!"})
   }
 
   const handleDeleteCard = (index: number) => {
@@ -77,6 +81,7 @@ const Editor: React.FC = () => {
     setDeck([...deck])
     setDeckHasChanged(true);
     console.log("change");
+    addToast({title: "Card deleted!"})
   }
 
   const handleClearNewCard = () => {
@@ -106,6 +111,7 @@ const Editor: React.FC = () => {
     } catch (e) {
       setDeckHasChanged(true);
       console.log("Error upserting deck");
+      addToast({title: "Error upserting deck"})
     }
 
     if (isNewDeck) {
@@ -157,6 +163,7 @@ const Editor: React.FC = () => {
     setIsNewDeck(true);
     query?.deleteDeckById(deckUuid);
     router.push("/");
+    addToast({title: "Deck deleted!"})
   }
 
   const checkIfUserIsOwner = () => {
@@ -255,6 +262,7 @@ const Editor: React.FC = () => {
                       </>
                     )}
                   </>
+      
                 )}
               </>
               {!isOwner && (

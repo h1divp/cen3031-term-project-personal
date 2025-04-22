@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { DecksSection } from "@/components/DecksSection";
 import { useQueryContext } from "@/contexts/QueryProvider";
 import { Tables } from "@/types/database.types";
+import  ToastCall from "@/components/Toast"
 
 export default function Home() {
 
