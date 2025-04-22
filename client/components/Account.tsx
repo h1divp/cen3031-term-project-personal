@@ -13,6 +13,8 @@ import { User } from "@supabase/supabase-js";
 import { QueryKey, useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { addToast } from "@heroui/toast";
+import { title } from "process";
 
 
 export const AccountSection = () => {
@@ -52,6 +54,9 @@ export const AccountSection = () => {
   const changeUsernameOnClick = () => {
     session?.changeUsername(newUsername);
     // router.refresh();
+    addToast({
+      title: "Username Changed! Refresh the page"
+    })
   }
 
   const changePasswordOnClick = () => {
