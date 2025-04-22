@@ -22,15 +22,14 @@ const Editor: React.FC = () => {
 
   const [deck, setDeck] = useState<Card[]>([]);
   const [deckUuid, setDeckUuid] = useState<string | null>(null);
-  const [deckName, setDeckName] = useState<string>("New Deck");
   const [currentCard, setCurrentCard] = useState<Card>({ front: "", back: "" });
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isNewDeck, setIsNewDeck] = useState<boolean>(true);
+  const [isOwner, setIsOwner] = useState<boolean>(false);
   const [deckHasChanged, setDeckHasChanged] = useState<boolean>(false);
-
-  // TODO:
-  // Make sure editable decks can only be editable by author
-  // - (leads to idea for public / private deck)
+  const [deckName, setDeckName] = useState<string>("New Deck");
+  const [isPublicDeck, setIsPublicDeck] = useState<boolean>(false);
+  const [deckAuthorId, setDeckAuthorId] = useState<Tables<"decks">["author"]>("");
 
   // TODO UI:
   // create a way to show error messages on screen
@@ -97,7 +96,8 @@ const Editor: React.FC = () => {
       author: session?.user.id,
       name: deckName,
       cards: [...deck],
-      total_cards: deck.length
+      total_cards: deck.length,
+      isPublic: isPublicDeck
     }
 
     try {
@@ -122,20 +122,31 @@ const Editor: React.FC = () => {
   const handleDeckNameChange = (e: any) => {
     setDeckName(e);
     setDeckHasChanged(true);
-    console.log("change");
+  }
+
+  const handleChangeDeckPublic = () => {
+    setDeckHasChanged(true);
+    setIsPublicDeck(!isPublicDeck);
+  }
+
+  const handleCancelEdits = () => {
+    setIsEditing(false);
+    loadDeckFromUuid();
   }
 
   const loadDeckFromUuid = async () => {
+    console.log("FLAG")
     if (!deckUuid) return;
     // if (isNewDeck) return;
     // query?.getDeckById(deckUuid).then(res => {
     // TODO: validate json
     const res: any = await query?.getDeckById(deckUuid);
     console.log(res);
-    setDeck(res[0].cards);
-    setDeckName(res[0].name);
+    setDeck(res[0]["cards"]);
+    setDeckName(res[0]["name"]);
     setIsNewDeck(false);
-    // });
+    setIsPublicDeck(res[0]["isPublic"]);
+    setDeckAuthorId(res[0]["author"]);
   }
 
   const handleDeleteDeck = () => {
@@ -148,12 +159,22 @@ const Editor: React.FC = () => {
     router.push("/");
   }
 
+  const checkIfUserIsOwner = () => {
+    console.log("FLAG 2")
+    // if (isNewDeck) {
+    //   setIsOwner(true);
+    //   return;
+    // }
+    setIsOwner(session?.user?.id === deckAuthorId);
+    console.log(isOwner, session?.user?.id, deckAuthorId);
+    return;
+  }
+
   useEffect(() => {
     // If a deck is passed as a search parameter in url, fetch the deck.
     if (!session?.user) return;
     const param = searchParams.get("deck");
     setDeckUuid(param); // will stay as null if it doesn't exist. Useful for later checks.
-    console.log("deck parameter:", param);
   }, [session])
 
   useEffect(() => {
@@ -162,13 +183,16 @@ const Editor: React.FC = () => {
     loadDeckFromUuid();
   }, [deckUuid])
 
+  useEffect(() => {
+    checkIfUserIsOwner();
+  }, [deckAuthorId]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavigationBar />
 
       <div className="container mx-auto flex-1">
-        {/*TODO: pull text data from loaded deck obj*/}
-        <h1 className="text-2xl font-bold mb-4">Create Deck</h1>
+        <h1 className="text-2xl font-bold mb-4">{deckUuid ? ("Edit Deck") : ("Create Deck")}</h1>
 
         <div className="grid grid-cols-2 gap-6">
           <Textarea
@@ -221,16 +245,21 @@ const Editor: React.FC = () => {
                 ) : (
                   <>
                     {!isEditing ? (
-                      <Button variant='ghost' size='sm' onPress={() => handleEditDeck()}>Edit Deck</Button>
+                      <Button variant='ghost' size='sm' onPress={() => handleEditDeck()} isDisabled={!isOwner}>Edit Deck</Button>
                     ) : (
                       <>
                         <Button variant='ghost' size='sm' onPress={() => handleUpsertDeck()} isDisabled={!deckHasChanged}>Save Deck</Button>
                         <Button variant='ghost' size='sm' onPress={() => handleDeleteDeck()}>Delete Deck</Button>
+                        <Button variant='ghost' size='sm' onPress={() => handleChangeDeckPublic()}>{isPublicDeck ? ("Make private") : ("Make public")}</Button>
+                        <Button variant='ghost' size='sm' onPress={() => handleCancelEdits()}>Cancel</Button>
                       </>
                     )}
                   </>
                 )}
               </>
+              {!isOwner && (
+                <p className="text-gray-500 text-sm">You do not own this deck</p>
+              )}
             </div>
             <div className='flex flex-col gap-2'>
               {deck.map((card, index) => (

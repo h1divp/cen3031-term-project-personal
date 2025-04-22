@@ -30,7 +30,7 @@ export default function Home() {
       query?.getUserDecks(session.user.id).then((decks: any) => {
         setUserDecks(decks);
       });
-      query?.getRecentDecks().then((decks: any) => {
+      query?.getRecentPublicDecks().then((decks: any) => {
         setRecentDecks(decks);
       });
     };
@@ -64,11 +64,11 @@ export default function Home() {
 
         {/* Column 1 */}
         <div className="flex-1 bg-gray-100 p-4 rounded-lg">
-          <h2 className="text-xl font-bold my-2">Games</h2>
+          <h2 className="text-xl font-bold my-2">Current Games</h2>
           <Card
             title="New Game"
             details=""
-            onClick={() => router.push('/game')}
+            onClick={() => router.push('/creategame')}
             isMenuOpt
           />
           <div className="space-y-3">
