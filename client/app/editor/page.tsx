@@ -31,10 +31,6 @@ const Editor: React.FC = () => {
   const [isPublicDeck, setIsPublicDeck] = useState<boolean>(false);
   const [deckAuthorId, setDeckAuthorId] = useState<Tables<"decks">["author"]>("");
 
-  // TODO:
-  // Make sure editable decks can only be editable by author
-  // - (leads to idea for public / private deck)
-
   // TODO UI:
   // create a way to show error messages on screen
 
@@ -126,7 +122,6 @@ const Editor: React.FC = () => {
   const handleDeckNameChange = (e: any) => {
     setDeckName(e);
     setDeckHasChanged(true);
-    console.log("change");
   }
 
   const handleChangeDeckPublic = () => {
@@ -197,7 +192,6 @@ const Editor: React.FC = () => {
       <NavigationBar />
 
       <div className="container mx-auto flex-1">
-        {/*TODO: pull text data from loaded deck obj*/}
         <h1 className="text-2xl font-bold mb-4">{deckUuid ? ("Edit Deck") : ("Create Deck")}</h1>
 
         <div className="grid grid-cols-2 gap-6">
