@@ -59,7 +59,7 @@ const Editor: React.FC = () => {
       }
     }))
     setDeckHasChanged(true);
-    addToast({title: "Deck changed!"})
+    
   }
 
   const handleEditCardBack = (index: number, e: any) => {
@@ -71,7 +71,7 @@ const Editor: React.FC = () => {
       }
     }))
     setDeckHasChanged(true);
-    addToast({title: "Deck changed!"})
+    
   }
 
   const handleDeleteCard = (index: number) => {
@@ -117,11 +117,13 @@ const Editor: React.FC = () => {
       setIsNewDeck(false);
       setIsEditing(false);
       setDeckUuid(upsertDeckUuid);
+      addToast({title: "Created new Deck!"})
     }
   }
 
   const handleEditDeck = () => {
     setIsEditing(!isEditing);
+    
   }
 
   const handleDeckNameChange = (e: any) => {
