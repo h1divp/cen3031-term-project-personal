@@ -22,7 +22,8 @@ export default function CreateGame() {
   const [deckName, setDeckName] = useState<string>("");
   const [selectedDeckId, setSelectedDeckId] = useState<string>("");
   const [isNewGame, setIsNewGame] = useState<boolean>(true);
-  const [gameUuid, setGameUuid] = useState<string | null>(null); const [isPublicDeck, setIsPublicDeck] = useState<boolean>(false);
+  const [gameUuid, setGameUuid] = useState<string | null>(null);
+  const [isPublicDeck, setIsPublicDeck] = useState<boolean>(false);
   const [publicDeckList, setPublicDeckList] = useState<Tables<"decks">[]>([]);
   const [privateDeckList, setPrivateDeckList] = useState<Tables<"decks">[]>([]);
   const [selectedDeck, setSelectedDeck] = useState<Tables<"decks"> | undefined>(undefined);
