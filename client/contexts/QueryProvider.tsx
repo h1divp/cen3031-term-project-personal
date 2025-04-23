@@ -10,6 +10,8 @@ type QueryContextType = {
   getDeckById: (id: Tables<"decks">["id"]) => void;
   upsertDeck: (deck: Tables<"decks">) => void;
   deleteDeckById: (deckId: Tables<"decks">["id"]) => void;
+  upsertGame: (game: Tables<"games">) => void;
+  deleteGameById: (gameId: Tables<"games">["id"]) => void;
 }
 
 const QueryContext = createContext<QueryContextType | undefined>(undefined);
@@ -66,8 +68,20 @@ export const QueryProvider = ({ children }: { children: React.ReactNode }) => {
     console.log("Query Context: deck deletion handled");
   }
 
+  const upsertGame = async (game: Tables<"games">) => {
+    const { error } = await supabase.from("games").upsert(game);
+    if (error) console.log(error);
+    console.log("Query Context: game upsertion handled");
+  }
+
+  const deleteGameById = async (gameId: Tables<"games">["id"]) => {
+    const { error } = await supabase.from("games").delete().eq("id", gameId);
+    if (error) console.log(error);
+    console.log("Query Context: game deletion handled");
+  }
+
   return (
-    <QueryContext.Provider value={{ userData, getUserStorageRowFromId, getUserDecks, getRecentPublicDecks, getDeckById, upsertDeck, deleteDeckById }} >
+    <QueryContext.Provider value={{ userData, getUserStorageRowFromId, getUserDecks, getRecentPublicDecks, getDeckById, upsertDeck, deleteDeckById, upsertGame, deleteGameById }} >
       {children}
     </QueryContext.Provider>
   )
