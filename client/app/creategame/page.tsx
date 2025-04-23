@@ -4,7 +4,7 @@ import { Button, ButtonGroup } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/select";
 import { NumberInput } from "@heroui/number-input";
 import { useEffect, useState } from "react";
-import { Input } from "@heroui/input";
+import { Input, Textarea } from "@heroui/input";
 import { useUserContext } from "@/contexts/UserProvider";
 import { useQueryContext } from "@/contexts/QueryProvider";
 import { Tables } from "@/types/database.types";
@@ -16,10 +16,12 @@ export default function Game() {
 
   const [gameName, setGameName] = useState<string>("New Game");
   const [deckName, setDeckName] = useState<string>("");
+  const [selectedDeckId, setSelectedDeckId] = useState<string>("");
   const [isNewGame, setIsNewGame] = useState<boolean>(true);
   const [isPublicDeck, setIsPublicDeck] = useState<boolean>(false);
-  const [publicDeckList, setPublicDeckList] = useState<Tables<"decks">[] | undefined>(undefined);
-  const [privateDeckList, setPrivateDeckList] = useState<Tables<"decks">[] | undefined>(undefined);
+  const [publicDeckList, setPublicDeckList] = useState<Tables<"decks">[]>([]);
+  const [privateDeckList, setPrivateDeckList] = useState<Tables<"decks">[]>([]);
+  const [selectedDeck, setSelectedDeck] = useState<Tables<"decks"> | undefined>(undefined);
 
   const handleGameNameChange = (e: any) => {
     setGameName(e);
@@ -33,9 +35,12 @@ export default function Game() {
     setIsPublicDeck(!isPublicDeck);
   }
 
-  const getPublicDeckItems = () => {
-
-
+  const handleSelectDeck = (e) => {
+    if (isPublicDeck) {
+      setSelectedDeck(publicDeckList.find((deck) => deck.id === e.target.value))
+    } else {
+      setSelectedDeck(privateDeckList.find((deck) => deck.id === e.target.value))
+    }
   }
 
   useEffect(() => {
@@ -96,7 +101,31 @@ export default function Game() {
             {deckName.length ? (
               <p className="text-lg font-bold mb-4">{deckName}</p>
             ) : (
-              <p className="text-md text-grey-500 font-bold mb-4">No deck selected</p>
+              <>
+                <p className="text-md text-grey-500 font-bold mb-4">{selectedDeck?.name ?? `No deck selected`}</p>
+                <div className="flex flex-col gap-2">
+                  {selectedDeck?.cards && selectedDeck.cards.map((card: any, index) => (
+
+                    <div className='container flex flex-row gap-6 h-20 items-center'>
+                      <p className='text-sm text-center'>{index + 1}</p>
+                      <Textarea
+                        value={card.front}
+                        className="w-full"
+                        labelPlacement="outside"
+                        variant='bordered'
+                        isReadOnly
+                      />
+                      <Textarea
+                        value={card.back}
+                        className="w-full"
+                        labelPlacement="outside"
+                        variant='bordered'
+                        isReadOnly
+                      />
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
           {/*Settings*/}
@@ -123,7 +152,9 @@ export default function Game() {
                   className="max-w-sm mb-2"
                   size="sm"
                   placeholder="Deck name"
+                  variant="bordered"
                   items={publicDeckList}
+                  onChange={handleSelectDeck}
                 >
                   {(deck) => <SelectItem>{deck.name}</SelectItem>}
                 </Select>
@@ -132,12 +163,14 @@ export default function Game() {
                   className="max-w-sm mb-2"
                   size="sm"
                   placeholder="Deck name"
+                  variant="bordered"
                   items={privateDeckList}
+                  onChange={handleSelectDeck}
                 >
                   {(deck) => <SelectItem>{deck.name}</SelectItem>}
                 </Select>
               )}
-              <NumberInput className="max-w-sm mb-2" defaultValue={1} size="sm" label="Max players" minValue={1} maxValue={15} />
+              <NumberInput className="max-w-sm mb-2" defaultValue={1} size="sm" label="Max players" minValue={1} maxValue={15} variant="bordered" />
               <Button
                 variant="ghost"
                 size="sm"
