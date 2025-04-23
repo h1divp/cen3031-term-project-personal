@@ -3,18 +3,61 @@ import { NavigationBar } from "@/components/Navbar";
 import { Button, ButtonGroup } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/select";
 import { NumberInput } from "@heroui/number-input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@heroui/input";
+import { useUserContext } from "@/contexts/UserProvider";
+import { useQueryContext } from "@/contexts/QueryProvider";
+import { Tables } from "@/types/database.types";
 
 export default function Game() {
+
+  const session = useUserContext();
+  const query = useQueryContext();
 
   const [gameName, setGameName] = useState<string>("New Game");
   const [deckName, setDeckName] = useState<string>("");
   const [isNewGame, setIsNewGame] = useState<boolean>(true);
+  const [isPublicDeck, setIsPublicDeck] = useState<boolean>(false);
+  const [publicDeckList, setPublicDeckList] = useState<Tables<"decks">[] | undefined>(undefined);
+  const [privateDeckList, setPrivateDeckList] = useState<Tables<"decks">[] | undefined>(undefined);
 
   const handleGameNameChange = (e: any) => {
     setGameName(e);
   }
+
+  const handleCreateGame = () => {
+
+  }
+
+  const handleSetDeckPublic = () => {
+    setIsPublicDeck(!isPublicDeck);
+  }
+
+  const getPublicDeckItems = () => {
+
+
+  }
+
+  useEffect(() => {
+    session?.getSessionData();
+  }, [])
+
+  useEffect(() => {
+    const fetchDecks = async () => {
+      if (!session?.user?.id) return;
+
+      query?.getUserDecks(session.user.id).then((decks: any) => {
+        setPrivateDeckList(decks);
+        console.log("private list", privateDeckList, decks);
+      });
+      query?.getRecentPublicDecks().then((decks: any) => {
+        setPublicDeckList(decks);
+        console.log("public list", publicDeckList, decks);
+      });
+    };
+
+    fetchDecks();
+  }, [session?.user?.id, query]);
 
   return (
     <div className="min-h-sreen flex flex-col">
@@ -65,16 +108,35 @@ export default function Game() {
                 <Button
                   variant="ghost"
                   size="sm"
+                  isDisabled={isPublicDeck}
+                  onClick={handleSetDeckPublic}
                 >Public</Button>
                 <Button
                   variant="ghost"
                   size="sm"
+                  isDisabled={!isPublicDeck}
+                  onClick={handleSetDeckPublic}
                 >Private</Button>
               </ButtonGroup>
-              <Select className="max-w-sm mb-2" size="sm" placeholder="Deck name">
-                <SelectItem key="1">test</SelectItem>
-                <SelectItem key="2">test 2</SelectItem>
-              </Select>
+              {isPublicDeck ? (
+                <Select
+                  className="max-w-sm mb-2"
+                  size="sm"
+                  placeholder="Deck name"
+                  items={publicDeckList}
+                >
+                  {(deck) => <SelectItem>{deck.name}</SelectItem>}
+                </Select>
+              ) : (
+                <Select
+                  className="max-w-sm mb-2"
+                  size="sm"
+                  placeholder="Deck name"
+                  items={privateDeckList}
+                >
+                  {(deck) => <SelectItem>{deck.name}</SelectItem>}
+                </Select>
+              )}
               <NumberInput className="max-w-sm mb-2" defaultValue={1} size="sm" label="Max players" minValue={1} maxValue={15} />
               <Button
                 variant="ghost"
