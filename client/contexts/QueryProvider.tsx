@@ -10,6 +10,8 @@ type QueryContextType = {
   getDeckById: (id: Tables<"decks">["id"]) => void;
   upsertDeck: (deck: Tables<"decks">) => void;
   deleteDeckById: (deckId: Tables<"decks">["id"]) => void;
+  getCurrentGames: () => void;
+  getGameById: (id: Tables<"games">["id"]) => void;
   upsertGame: (game: Tables<"games">) => void;
   deleteGameById: (gameId: Tables<"games">["id"]) => void;
 }
@@ -68,6 +70,18 @@ export const QueryProvider = ({ children }: { children: React.ReactNode }) => {
     console.log("Query Context: deck deletion handled");
   }
 
+  const getCurrentGames = async () => {
+    const { data, error } = await supabase.from("games").select().limit(20).order("created_at", { ascending: false });
+    if (error) console.log(error);
+    return data;
+  }
+
+  const getGameById = async (deckId: Tables<"games">["id"]) => {
+    const { data, error } = await supabase.from("games").select().eq("id", deckId);
+    if (error) console.log(error);
+    return data;
+  }
+
   const upsertGame = async (game: Tables<"games">) => {
     const { error } = await supabase.from("games").upsert(game);
     if (error) console.log(error);
@@ -81,7 +95,7 @@ export const QueryProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <QueryContext.Provider value={{ userData, getUserStorageRowFromId, getUserDecks, getRecentPublicDecks, getDeckById, upsertDeck, deleteDeckById, upsertGame, deleteGameById }} >
+    <QueryContext.Provider value={{ userData, getUserStorageRowFromId, getUserDecks, getRecentPublicDecks, getDeckById, upsertDeck, deleteDeckById, getCurrentGames, getGameById, upsertGame, deleteGameById }} >
       {children}
     </QueryContext.Provider>
   )

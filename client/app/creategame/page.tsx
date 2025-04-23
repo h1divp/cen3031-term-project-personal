@@ -8,17 +8,21 @@ import { Input, Textarea } from "@heroui/input";
 import { useUserContext } from "@/contexts/UserProvider";
 import { useQueryContext } from "@/contexts/QueryProvider";
 import { Tables } from "@/types/database.types";
+import { useRouter, useSearchParams } from "next/navigation";
+import { v4 as uuid } from 'uuid';
 
-export default function Game() {
+export default function CreateGame() {
 
+  const router = useRouter();
   const session = useUserContext();
   const query = useQueryContext();
+  const searchParams = useSearchParams();
 
   const [gameName, setGameName] = useState<string>("New Game");
   const [deckName, setDeckName] = useState<string>("");
   const [selectedDeckId, setSelectedDeckId] = useState<string>("");
   const [isNewGame, setIsNewGame] = useState<boolean>(true);
-  const [isPublicDeck, setIsPublicDeck] = useState<boolean>(false);
+  const [gameUuid, setGameUuid] = useState<string | null>(null); const [isPublicDeck, setIsPublicDeck] = useState<boolean>(false);
   const [publicDeckList, setPublicDeckList] = useState<Tables<"decks">[]>([]);
   const [privateDeckList, setPrivateDeckList] = useState<Tables<"decks">[]>([]);
   const [selectedDeck, setSelectedDeck] = useState<Tables<"decks"> | undefined>(undefined);
@@ -32,9 +36,13 @@ export default function Game() {
     if (!session?.user?.id) return;
     if (selectedDeckId === "") return;
 
+    const upsertGameId = gameUuid ?? uuid();
+
     const newGame: Tables<"games"> = {
+      id: upsertGameId,
       author: session?.user.id,
-      deck: selectedDeckId
+      deck: selectedDeckId,
+      name: gameName
     }
 
     try {
@@ -44,6 +52,25 @@ export default function Game() {
       console.log("Error upserting deck");
     }
 
+    setGameUuid(upsertGameId);
+  }
+
+  const loadGameFromUuid = async () => {
+    if (!gameUuid) return;
+
+    const res: any = await query?.getGameById(gameUuid);
+    console.log("res", res);
+    setGameName(res[0]["name"]);
+    setIsNewGame(false);
+
+    query?.getDeckById(res[0]["deck"]).then((deck: any) => {
+      console.log("resseldeck", deck[0]);
+      setSelectedDeck(deck[0]);
+    })
+  }
+
+  const handleStartGame = () => {
+    router.push(`/game?id=${gameUuid}`);
   }
 
   const handleSetDeckPublic = () => {
@@ -59,13 +86,29 @@ export default function Game() {
     setSelectedDeckId(e.target.value);
   }
 
+  const handleDeleteGame = () => {
+    if (!gameUuid) return;
+    query?.deleteGameById(gameUuid);
+    router.push("/");
+  }
+
   useEffect(() => {
     session?.getSessionData();
   }, [])
 
   useEffect(() => {
+    if (!gameUuid) return;
+    query?.getGameById(gameUuid);
+    loadGameFromUuid();
+
+  }, [gameUuid])
+
+  useEffect(() => {
     const fetchDecks = async () => {
       if (!session?.user?.id) return;
+
+      const param = searchParams.get("id");
+      setGameUuid(param);
 
       query?.getUserDecks(session.user.id).then((decks: any) => {
         setPrivateDeckList(decks);
@@ -96,11 +139,19 @@ export default function Game() {
           isDisabled={!isNewGame}
         />
         <div className="flex flex-row gap-2 mb-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onPress={() => handleCreateGame()}
-          >Create Game</Button>
+          {isNewGame ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onPress={() => handleCreateGame()}
+            >Create Game</Button>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onPress={() => handleStartGame()}
+            >Start</Button>
+          )}
           {/*Ready*/}
           {/*<Button
             variant="ghost"
@@ -154,13 +205,13 @@ export default function Game() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  isDisabled={isPublicDeck}
+                  isDisabled={isPublicDeck || !isNewGame}
                   onClick={handleSetDeckPublic}
                 >Public</Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  isDisabled={!isPublicDeck}
+                  isDisabled={!isPublicDeck || !isNewGame}
                   onClick={handleSetDeckPublic}
                 >Private</Button>
               </ButtonGroup>
@@ -172,6 +223,7 @@ export default function Game() {
                   variant="bordered"
                   items={publicDeckList}
                   onChange={handleSelectDeck}
+                  isDisabled={!isNewGame}
                 >
                   {(deck) => <SelectItem>{deck.name}</SelectItem>}
                 </Select>
@@ -183,14 +235,19 @@ export default function Game() {
                   variant="bordered"
                   items={privateDeckList}
                   onChange={handleSelectDeck}
+                  isDisabled={!isNewGame}
                 >
                   {(deck) => <SelectItem>{deck.name}</SelectItem>}
                 </Select>
               )}
-              <NumberInput className="max-w-sm mb-2" defaultValue={1} size="sm" label="Max players" minValue={1} maxValue={15} variant="bordered" />
+              <NumberInput className="max-w-sm mb-2" defaultValue={1} size="sm" label="Max players" minValue={1} maxValue={15} variant="bordered"
+                isDisabled={!isNewGame}
+              />
               <Button
                 variant="ghost"
                 size="sm"
+                isDisabled={isNewGame}
+                onPress={() => handleDeleteGame()}
               >Delete Game</Button>
             </div>
           </div>

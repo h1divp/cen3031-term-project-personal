@@ -1,6 +1,5 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from "@heroui/button";
 import { NavigationBar } from '@/components/Navbar';
@@ -135,7 +134,6 @@ const Editor: React.FC = () => {
   }
 
   const loadDeckFromUuid = async () => {
-    console.log("FLAG")
     if (!deckUuid) return;
     // if (isNewDeck) return;
     // query?.getDeckById(deckUuid).then(res => {
