@@ -22,12 +22,27 @@ export default function Game() {
   const [publicDeckList, setPublicDeckList] = useState<Tables<"decks">[]>([]);
   const [privateDeckList, setPrivateDeckList] = useState<Tables<"decks">[]>([]);
   const [selectedDeck, setSelectedDeck] = useState<Tables<"decks"> | undefined>(undefined);
+  const [userIsReady, setUserIsReady] = useState<boolean>(false);
 
   const handleGameNameChange = (e: any) => {
     setGameName(e);
   }
 
   const handleCreateGame = () => {
+    if (!session?.user?.id) return;
+    if (selectedDeckId === "") return;
+
+    const newGame: Tables<"games"> = {
+      author: session?.user.id,
+      deck: selectedDeckId
+    }
+
+    try {
+      query?.upsertGame(newGame);
+      setIsNewGame(false);
+    } catch (e) {
+      console.log("Error upserting deck");
+    }
 
   }
 
@@ -41,6 +56,7 @@ export default function Game() {
     } else {
       setSelectedDeck(privateDeckList.find((deck) => deck.id === e.target.value))
     }
+    setSelectedDeckId(e.target.value);
   }
 
   useEffect(() => {
@@ -83,12 +99,13 @@ export default function Game() {
           <Button
             variant="ghost"
             size="sm"
+            onPress={() => handleCreateGame()}
           >Create Game</Button>
           {/*Ready*/}
-          <Button
+          {/*<Button
             variant="ghost"
             size="sm"
-          >Ready</Button>
+          >Ready</Button>*/}
         </div>
         <div className="flex flex-row mx-auto gap-4">
           {/* -- Columns -- */}
@@ -106,7 +123,7 @@ export default function Game() {
                 <div className="flex flex-col gap-2">
                   {selectedDeck?.cards && selectedDeck.cards.map((card: any, index) => (
 
-                    <div className='container flex flex-row gap-6 h-20 items-center'>
+                    <div className='container flex flex-row gap-6 h-20 items-center' key={index}>
                       <p className='text-sm text-center'>{index + 1}</p>
                       <Textarea
                         value={card.front}
