@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { UserProvider } from "@/contexts/UserProvider";
 import { QueryProvider } from "@/contexts/QueryProvider";
+import {ToastProvider} from "@heroui/toast";
 
 export interface ProvidersProps {
   children: React.ReactNode;
@@ -27,6 +28,7 @@ export function Providers({ children, themeProps }: ProvidersProps) {
 
   return (
     <HeroUIProvider navigate={router.push}>
+      <ToastProvider placement="top-center"/>
       <NextThemesProvider {...themeProps}>
         <UserProvider>
           <QueryProvider>

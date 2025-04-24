@@ -10,6 +10,7 @@ import { DecksSection } from "@/components/DecksSection";
 import { useQueryContext } from "@/contexts/QueryProvider";
 import { Tables } from "@/types/database.types";
 
+
 export default function Home() {
 
   const router = useRouter();
