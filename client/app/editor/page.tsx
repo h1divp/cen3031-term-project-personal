@@ -47,7 +47,7 @@ const Editor: React.FC = () => {
     setCurrentCard({ front: "", back: "" })
     setDeckHasChanged(true);
     console.log("change");
-    addToast({title: "Card changed!"})
+    addToast({ title: "Card changed!" })
   }
 
   const handleEditCardFront = (index: number, e: any) => {
@@ -59,7 +59,7 @@ const Editor: React.FC = () => {
       }
     }))
     setDeckHasChanged(true);
-    
+
   }
 
   const handleEditCardBack = (index: number, e: any) => {
@@ -71,7 +71,7 @@ const Editor: React.FC = () => {
       }
     }))
     setDeckHasChanged(true);
-    
+
   }
 
   const handleDeleteCard = (index: number) => {
@@ -80,7 +80,7 @@ const Editor: React.FC = () => {
     setDeck([...deck])
     setDeckHasChanged(true);
     console.log("change");
-    addToast({title: "Card deleted!"})
+    addToast({ title: "Card deleted!" })
   }
 
   const handleClearNewCard = () => {
@@ -110,20 +110,22 @@ const Editor: React.FC = () => {
     } catch (e) {
       setDeckHasChanged(true);
       console.log("Error upserting deck");
-      addToast({title: "Error upserting deck"})
+      addToast({ title: "Error upserting deck" })
     }
 
     if (isNewDeck) {
       setIsNewDeck(false);
       setIsEditing(false);
       setDeckUuid(upsertDeckUuid);
-      addToast({title: "Created new Deck!"})
+      addToast({ title: "Created new Deck!" })
+    } else {
+      addToast({ title: "Deck changes saved!" })
     }
   }
 
   const handleEditDeck = () => {
     setIsEditing(!isEditing);
-    
+
   }
 
   const handleDeckNameChange = (e: any) => {
@@ -163,7 +165,7 @@ const Editor: React.FC = () => {
     setIsNewDeck(true);
     query?.deleteDeckById(deckUuid);
     router.push("/");
-    addToast({title: "Deck deleted!"})
+    addToast({ title: "Deck deleted!" })
   }
 
   const checkIfUserIsOwner = () => {
@@ -262,10 +264,10 @@ const Editor: React.FC = () => {
                       </>
                     )}
                   </>
-      
+
                 )}
               </>
-              {!isOwner && (
+              {!isOwner && !isNewDeck && (
                 <p className="text-gray-500 text-sm">You do not own this deck</p>
               )}
             </div>
